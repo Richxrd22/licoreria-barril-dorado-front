@@ -38,10 +38,8 @@ export const validationSchema = yup.object({
     .typeError("Fecha no válida"),
   
   id_categoria: yup
-    .string("Seleccione una categoría")
-    .required("Campo Obligatorio"),
+    .required("Seleccione una categoría"),
     
   id_proveedor: yup
-    .string("Seleccione un proveedor")
-    .required("Campo Obligatorio")
+    .required("Seleccione un proveedor")
 });
