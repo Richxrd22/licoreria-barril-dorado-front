@@ -1,4 +1,10 @@
-import { DatePicker, Input, Select, SelectItem } from "@nextui-org/react";
+import {
+  DatePicker,
+  Input,
+  Select,
+  SelectItem,
+  Textarea,
+} from "@nextui-org/react";
 import { useFormik } from "formik";
 import React, { useEffect } from "react";
 import { validationSchema } from "./validacion";
@@ -55,137 +61,158 @@ export default function ProductoForm() {
         isInvalid={formik.touched.nombre && Boolean(formik.errors.nombre)}
         errorMessage={formik.touched.nombre && formik.errors.nombre}
       />
+      <div className="flex gap-5">
+        <Select
+          id="id_categoria"
+          name="id_categoria"
+          label="Categoria"
+          onChange={formik.handleChange}
+          onBlur={() => formik.handleBlur("id_categoria")}
+          onError={() =>
+            !formik.values.id_categoria.length &&
+            formik.touched.id_categoria &&
+            Boolean(formik.errors.id_categoria)
+          }
+          isInvalid={
+            !formik.values.id_categoria.length &&
+            formik.touched.id_categoria &&
+            Boolean(formik.errors.id_categoria)
+          }
+          errorMessage={
+            !formik.values.id_categoria.length &&
+            formik.touched.id_categoria &&
+            formik.errors.id_categoria
+          }
+          placeholder="Selecciona una Categoria"
+          className="max-w-ws"
+          onClose={() => {
+            formik.setFieldTouched("id_categoria", true);
+          }}
+        >
+          <SelectItem>Cervezas</SelectItem>
+          <SelectItem>Vinos</SelectItem>
+          <SelectItem>Licores</SelectItem>
+        </Select>
+        <Select
+          label="Proveedor"
+          placeholder="Selecciona un Proveedor"
+          id="id_proveedor"
+          name="id_proveedor"
+          onChange={formik.handleChange}
+          onBlur={() => formik.handleBlur("id_proveedor")}
+          onError={() =>
+            !formik.values.id_proveedor.length &&
+            formik.touched.id_proveedor &&
+            Boolean(formik.errors.id_proveedor)
+          }
+          isInvalid={
+            !formik.values.id_proveedor.length &&
+            formik.touched.id_proveedor &&
+            Boolean(formik.errors.id_proveedor)
+          }
+          errorMessage={
+            !formik.values.id_proveedor.length &&
+            formik.touched.id_proveedor &&
+            formik.errors.id_proveedor
+          }
+          className="max-w-ws"
+          onClose={() => {
+            formik.setFieldTouched("id_proveedor", true);
+          }}
+        >
+          <SelectItem>Johnnie Walker</SelectItem>
+          <SelectItem>Bacardi</SelectItem>
+          <SelectItem>Heineken</SelectItem>
+        </Select>
+      </div>
 
-      <Input
-        type="number"
-        label="Cantidad"
-        placeholder="Introduce la Cantidad"
-        id="cantidad"
-        name="cantidad"
-        value={formik.values.cantidad}
+      <div className="flex gap-5">
+        <Input
+          type="number"
+          label="Cantidad"
+          placeholder="Introduce la Cantidad"
+          id="cantidad"
+          name="cantidad"
+          value={formik.values.cantidad}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          onError={() =>
+            formik.touched.cantidad && Boolean(formik.errors.cantidad)
+          }
+          isInvalid={formik.touched.cantidad && Boolean(formik.errors.cantidad)}
+          errorMessage={formik.touched.cantidad && formik.errors.cantidad}
+        />
+        <Input
+          type="number"
+          label="Precio"
+          placeholder="0.00"
+          id="precio"
+          name="precio"
+          endContent={
+            <div className="pointer-events-none flex items-center">
+              <span className="text-default-400 text-small">S/</span>
+            </div>
+          }
+          value={formik.values.precio}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          onError={() => formik.touched.precio && Boolean(formik.errors.precio)}
+          isInvalid={formik.touched.precio && Boolean(formik.errors.precio)}
+          errorMessage={formik.touched.precio && formik.errors.precio}
+        />
+      </div>
+      <div className="flex gap-5">
+        <DatePicker
+          id="fecha_produccion"
+          label="Fecha Producción"
+          name="fecha_produccion"
+          value={formik.values.fecha_produccion}
+          onChange={(date) => {
+            formik.setFieldValue("fecha_produccion", date);
+            formik.validateField("fecha_produccion");
+          }}
+          onBlur={() => formik.setFieldTouched("fecha_produccion", true)}
+          isInvalid={
+            formik.touched.fecha_produccion && formik.errors.fecha_produccion
+          }
+          errorMessage={
+            formik.touched.fecha_produccion && formik.errors.fecha_produccion
+          }
+        />
+        <DatePicker
+          id="fecha_vencimiento"
+          label="Fecha Vencimiento"
+          name="fecha_vencimiento"
+          value={formik.values.fecha_vencimiento}
+          onChange={(date) => {
+            formik.setFieldValue("fecha_vencimiento", date);
+            formik.validateField("fecha_vencimiento");
+          }}
+          onBlur={() => formik.setFieldTouched("fecha_vencimiento", true)}
+          isInvalid={
+            formik.touched.fecha_vencimiento && formik.errors.fecha_vencimiento
+          }
+          errorMessage={
+            formik.touched.fecha_vencimiento && formik.errors.fecha_vencimiento
+          }
+        />
+      </div>
+      <Textarea
+        label="Descripcion"
+        placeholder="Ingresa una Descripcion"
+        name="descripcion"
+        id="descripcion"
+        value={formik.values.descripcion}
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
         onError={() =>
-          formik.touched.cantidad && Boolean(formik.errors.cantidad)
-        }
-        isInvalid={formik.touched.cantidad && Boolean(formik.errors.cantidad)}
-        errorMessage={formik.touched.cantidad && formik.errors.cantidad}
-      />
-
-      <Input
-        type="number"
-        label="Precio"
-        placeholder="0.00"
-        id="precio"
-        name="precio"
-        endContent={
-          <div className="pointer-events-none flex items-center">
-            <span className="text-default-400 text-small">S/</span>
-          </div>
-        }
-        value={formik.values.precio}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
-        onError={() => formik.touched.precio && Boolean(formik.errors.precio)}
-        isInvalid={formik.touched.precio && Boolean(formik.errors.precio)}
-        errorMessage={formik.touched.precio && formik.errors.precio}
-      />
-      <DatePicker
-        id="fecha_produccion"
-        label="Fecha Producción"
-        name="fecha_produccion"
-        value={formik.values.fecha_produccion}
-        onChange={(date) => {
-          formik.setFieldValue("fecha_produccion", date);
-          formik.validateField("fecha_produccion");
-        }}
-        onBlur={() => formik.setFieldTouched("fecha_produccion", true)}
-        isInvalid={
-          formik.touched.fecha_produccion && formik.errors.fecha_produccion
-        }
-        errorMessage={
-          formik.touched.fecha_produccion && formik.errors.fecha_produccion
-        }
-      />
-      <DatePicker
-        id="fecha_vencimiento"
-        label="Fecha Vencimiento"
-        name="fecha_vencimiento"
-        value={formik.values.fecha_vencimiento}
-        onChange={(date) => {
-          formik.setFieldValue("fecha_vencimiento", date);
-          formik.validateField("fecha_vencimiento");
-        }}
-        onBlur={() => formik.setFieldTouched("fecha_vencimiento", true)}
-        isInvalid={
-          formik.touched.fecha_vencimiento && formik.errors.fecha_vencimiento
-        }
-        errorMessage={
-          formik.touched.fecha_vencimiento && formik.errors.fecha_vencimiento
-        }
-      />
-      <Select
-        id="id_categoria"
-        name="id_categoria"
-        label="Categoria"
-        onChange={formik.handleChange}
-        onBlur={() => formik.handleBlur("id_categoria")}
-        onError={() =>
-          !formik.values.id_categoria.length &&
-          formik.touched.id_categoria &&
-          Boolean(formik.errors.id_categoria)
+          formik.touched.descripcion && Boolean(formik.errors.descripcion)
         }
         isInvalid={
-          !formik.values.id_categoria.length &&
-          formik.touched.id_categoria &&
-          Boolean(formik.errors.id_categoria)
+          formik.touched.descripcion && Boolean(formik.errors.descripcion)
         }
-        errorMessage={
-          !formik.values.id_categoria.length &&
-          formik.touched.id_categoria &&
-          formik.errors.id_categoria
-        }
-        placeholder="Selecciona una Categoria"
-        className="max-w-ws"
-        onClose={() => {
-          formik.setFieldTouched("id_categoria", true);
-        }}
-      >
-        <SelectItem>Cervezas</SelectItem>
-        <SelectItem>Vinos</SelectItem>
-        <SelectItem>Licores</SelectItem>
-      </Select>
-      <Select
-        label="Proveedor"
-        placeholder="Selecciona un Proveedor"
-        id="id_proveedor"
-        name="id_proveedor"
-        onChange={formik.handleChange}
-        onBlur={() => formik.handleBlur("id_proveedor")}
-        onError={() =>
-          !formik.values.id_proveedor.length &&
-          formik.touched.id_proveedor &&
-          Boolean(formik.errors.id_proveedor)
-        }
-        isInvalid={
-          !formik.values.id_proveedor.length &&
-          formik.touched.id_proveedor &&
-          Boolean(formik.errors.id_proveedor)
-        }
-        errorMessage={
-          !formik.values.id_proveedor.length &&
-          formik.touched.id_proveedor &&
-          formik.errors.id_proveedor
-        }
-        className="max-w-ws"
-        onClose={() => {
-          formik.setFieldTouched("id_proveedor", true);
-        }}
-      >
-        <SelectItem>Johnnie Walker</SelectItem>
-        <SelectItem>Bacardi</SelectItem>
-        <SelectItem>Heineken</SelectItem>
-      </Select>
+        errorMessage={formik.touched.descripcion && formik.errors.descripcion}
+      />
     </form>
   );
 }

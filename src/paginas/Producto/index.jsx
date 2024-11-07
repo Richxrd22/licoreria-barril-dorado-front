@@ -90,7 +90,7 @@ export default function Producto() {
           </TableRow>
         </TableBody>
       </Table>
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal size="2xl" isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (
             <>
