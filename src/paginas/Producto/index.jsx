@@ -50,8 +50,8 @@ export default function Producto() {
         <div>
           <h2 className="pb-3"> Filtro de Productos Categoria</h2>
           <Select
-            label="Favorite Animal"
-            placeholder="Select an animal"
+            label="Categoria "
+            placeholder="Seleccione una Categoria"
             selectionMode="multiple"
             className="max-w-xs "
             size="sm"
