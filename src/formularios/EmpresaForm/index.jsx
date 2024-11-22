@@ -1,7 +1,7 @@
 import { Input } from "@nextui-org/react";
 import { useFormik } from "formik";
 import React from "react";
-import validationSchema from "./validacion";
+import validacionEmpresa from "../../validaciones/validacionEmpresa";
 
 export default function EmpresaForm() {
   const formik = useFormik({
@@ -10,29 +10,29 @@ export default function EmpresaForm() {
       ruc: "",
       website: "",
     },
-    validationSchema: validationSchema,
+    validationSchema: validacionEmpresa,
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       /* try {
-							const token = await login(values);
-							localStorage.setItem("token", token);
-		  
-							const decodedToken = jwtDecode(token);
-							const idRol = decodedToken.id_rol;
-		  
-							// Redirige según el rol del usuario
-							if (idRol === 1) {
-								navigate("/admin");
-							} else {
-								navigate("/user");
-							}
-		  
-							resetForm(); // Limpia el formulario tras inicio de sesión exitoso
-						} catch (error) {
-							console.log("Error al iniciar sesión. Verifica tus credenciales.");
-						  
-						} finally {
-							setSubmitting(false); // Detiene el estado de "submitting"
-						}*/
+              const token = await login(values);
+              localStorage.setItem("token", token);
+      
+              const decodedToken = jwtDecode(token);
+              const idRol = decodedToken.id_rol;
+      
+              // Redirige según el rol del usuario
+              if (idRol === 1) {
+                navigate("/admin");
+              } else {
+                navigate("/user");
+              }
+      
+              resetForm(); // Limpia el formulario tras inicio de sesión exitoso
+            } catch (error) {
+              console.log("Error al iniciar sesión. Verifica tus credenciales.");
+              
+            } finally {
+              setSubmitting(false); // Detiene el estado de "submitting"
+            }*/
     },
   });
   return (

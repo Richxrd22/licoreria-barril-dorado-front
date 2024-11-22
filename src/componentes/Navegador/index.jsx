@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Navbar,
   NavbarBrand,
@@ -17,17 +18,39 @@ import {
 } from "@nextui-org/react";
 import { rutas, rutas_navegador, rutas_usuario } from "./datos";
 import { Link, NavLink, useLocation } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 export default function Navegador() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const location = useLocation();
   const [currentRouteName, setCurrentRouteName] = useState("");
-
+  const navigate = useNavigate();
   useEffect(() => {
-    const currentRoute = rutas.find(
-      (route) => route.ruta === location.pathname
-    );
-    setCurrentRouteName(currentRoute ? currentRoute.nombre : ""); // Solo asigna si currentRoute existe
-  }, [location]);
+    const pathParts = location.pathname.split("/"); // Divide la ruta en segmentos
+    const lastSegment = `/${pathParts.pop()}`; // Obtén el último segmento, con una barra inicial
+
+    // Busca la ruta que coincida con el último segmento
+    const currentRoute = rutas.find((route) => route.ruta === lastSegment);
+
+    setCurrentRouteName(currentRoute ? currentRoute.nombre : ""); // Actualiza el nombre si encuentra la ruta
+  }, [location.pathname]); // Escucha cambios en location.pathname
+
+  const [decodedToken, setDecodedToken] = useState(null);
+  useEffect(() => {
+    const miToken = localStorage.getItem("token");
+    if (miToken) {
+      const decoded = jwtDecode(miToken);
+      setDecodedToken(decoded);
+    }
+  }, []);
+
+  const Logout = () => {
+    localStorage.removeItem("token");
+    return (window.location.href = "/");
+  };
+
+  const baseRoute =
+    decodedToken?.roles === "ROLE_ADMIN" ? "/admin" : "/empleado";
+
   return (
     <>
       <Navbar
@@ -50,7 +73,10 @@ export default function Navegador() {
           {rutas_navegador.map((datos) => {
             return (
               <NavbarItem key={datos.id}>
-                <NavLink to={datos.ruta} className="text-white cursor-pointer">
+                <NavLink
+                  to={`${baseRoute}` + datos.ruta}
+                  className="text-white cursor-pointer"
+                >
                   {datos.nombre}
                 </NavLink>
               </NavbarItem>
@@ -68,11 +94,15 @@ export default function Navegador() {
             <DropdownMenu aria-label="Static Actions">
               {rutas_usuario.map((datos) => {
                 return (
-                  <DropdownItem key={datos.id}>
-                    <Link to={datos.ruta} className="block">
-                      {datos.nombre}
-                    </Link>
-                  </DropdownItem>
+                  <DropdownItem
+                    key={datos.id}
+                    title={datos.nombre}
+                    onClick={() =>
+                      datos.nombre === "Salir"
+                        ? Logout()
+                        : navigate(`${baseRoute}${datos.ruta}`)
+                    }
+                  />
                 );
               })}
             </DropdownMenu>
@@ -82,17 +112,17 @@ export default function Navegador() {
         <NavbarMenu>
           {rutas.map((datos) => (
             <NavbarMenuItem key={`${datos.id}`}>
-              {datos.nombre != "Salir" ? (
-                <Link
-                  onClick={() => setIsMenuOpen(false)}
-                  className="w-full"
-                  to={datos.ruta}
-                >
-                  {datos.nombre}
-                </Link>
-              ) : (
-                <Link className="text-danger">{datos.nombre}</Link>
-              )}
+              <span key={datos.id}
+                className={`${datos.nombre === "Salir" ? "text-danger-500" : "none"}`}
+                onClick={() =>
+                  datos.nombre === "Salir"
+                    ? Logout()
+                    : navigate(`${baseRoute}${datos.ruta}`)
+                }
+              >
+                {datos.nombre}
+              </span>
+
             </NavbarMenuItem>
           ))}
         </NavbarMenu>

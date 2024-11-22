@@ -1,0 +1,35 @@
+export const CloseCircleIcon = ({ width = "1em", height = "1em", color = "#ea0000", strokeWidth = 22, ...otherProps }) => (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      focusable="false"
+      role="presentation"
+      viewBox="0 0 467 467"
+      width={width}
+      height={height}
+      {...otherProps}
+    >
+      <path
+        d="M233.5,22a211.57,211.57,0,0,1,82.32,406.39A211.56,211.56,0,0,1,151.18,38.61,210.21,210.21,0,0,1,233.5,22m0-22C104.54,0,0,104.54,0,233.5S104.54,467,233.5,467,467,362.46,467,233.5,362.46,0,233.5,0Z"
+        fill={color}
+      />
+      <line
+        x1="109.55"
+        y1="357.04"
+        x2="357.04"
+        y2="109.55"
+        stroke={color}
+        strokeMiterlimit="10"
+        strokeWidth={strokeWidth}
+      />
+      <line
+        x1="110.26"
+        y1="110.26"
+        x2="357.74"
+        y2="357.74"
+        stroke={color}
+        strokeMiterlimit="10"
+        strokeWidth={strokeWidth}
+      />
+    </svg>
+  );

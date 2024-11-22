@@ -19,31 +19,29 @@ export default function Login() {
     },
     validationSchema: validationSchema,
     onSubmit: async (values, { setSubmitting, resetForm }) => {
-    /* try {
+      try {
         const token = await login(values);
         localStorage.setItem("token", token);
-
         const decodedToken = jwtDecode(token);
-        const idRol = decodedToken.id_rol;
-
-        // Redirige según el rol del usuario
-        if (idRol === 1) {
-          navigate("/admin");
+        const rol = decodedToken.roles;
+        if (rol === "ROLE_ADMIN") {
+          window.location.href = "/admin";
         } else {
-          navigate("/user");
+          window.location.href = "/empleado";
         }
 
-        resetForm(); // Limpia el formulario tras inicio de sesión exitoso
+        resetForm();
       } catch (error) {
         console.log("Error al iniciar sesión. Verifica tus credenciales.");
-        
+
       } finally {
-        setSubmitting(false); // Detiene el estado de "submitting"
-      }*/
+        setSubmitting(false);
+      }
     },
   });
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8"
+    style={{ minHeight: "calc(100vh - 90px)" }}>
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <img
           alt="Your Company"
@@ -112,7 +110,7 @@ export default function Login() {
               type="submit"
               className="flex w-full justify-center rounded-md bg-slate-800  px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 "
               disabled={formik.isSubmitting}
-           >
+            >
               Iniciar sesión
             </button>
           </div>

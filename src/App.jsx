@@ -1,10 +1,12 @@
-import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import "./App.css";
 import { lazy, Suspense, useEffect, useState } from "react";
 import Progress from "./componentes/Progress";
 import Navegador from "./componentes/Navegador";
-import { NextUIProvider } from "@nextui-org/react";
 import { jwtDecode } from "jwt-decode";
+import { FormularioProvider } from "./context/FormularioContext";
+import PrivateRoute from "./adicionales/PrivateRoute";
+import ConfirmacionProducto from "./formularios/ProductoForm/ConfirmacionProducto";
 const NotFound = lazy(() => import("./paginas/NotFound"));
 const Login = lazy(() => import("./paginas/Login"));
 const Panel = lazy(() => import("./paginas/Panel"));
@@ -15,12 +17,8 @@ const Empresa = lazy(() => import("./paginas/Empresa"));
 function App() {
   const [hideNavbar, setHideNavbar] = useState(false);
   const location = useLocation();
-
   const navigate = useNavigate();
-
-
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
   const [role, setRole] = useState(null);
 
   useEffect(() => {
@@ -28,10 +26,11 @@ function App() {
     if (token) {
       const decodedToken = jwtDecode(token);
       setIsAuthenticated(true);
-      setRole(decodedToken.id_rol);
+      setRole(decodedToken.roles);
     }
-  }, []);
+  }, [role, isAuthenticated]);
 
+  
   useEffect(() => {
     const handledRoutes = [
       "/",
@@ -42,11 +41,140 @@ function App() {
       "/proveedor",
       "/perfil",
       "/configuracion",
+      "/admin",
+      "/admin/producto",
+      "/admin/empleado",
+      "/admin/empresa",
+      "/admin/proveedor",
+      "/empleado/producto",
+      "/empleado/empleado",
+      "/empleado/empresa",
+      "/empleado/proveedor",
+      "/admin/producto/confirmacion"
     ];
     setHideNavbar(!handledRoutes.includes(location.pathname));
   }, [location.pathname]);
+
+  const shouldShowNavbar = () => isAuthenticated && !hideNavbar;
+
+  return (
+
+    <FormularioProvider>  {/* Envuelve tu aplicación con el proveedor */}
+      <div className="App">
+        {shouldShowNavbar() && <Navegador />}
+        <Suspense fallback={<Progress />}>
+          {isAuthenticated && role === "ROLE_ADMIN" && <RoutesAdministrador />}
+          {isAuthenticated && role !== "ROLE_ADMIN" && <RoutesEmpleados />}
+          {!isAuthenticated && <PublicRoutes />}
+        </Suspense>
+      </div>
+    </FormularioProvider>
+  );
+
+}
+
+function RoutesAdministrador() {
   return (
     <>
+
+      <Routes>
+        <Route exac path='/admin' element={<Panel />} />
+        <Route exac path='/admin/usuario/listar' element={"<TablaUsuario />"} />
+        <Route exac path="/admin/empleado" element={"<AgregarEmpleado />"} />
+        <Route exac path="/admin/empleado/listar" element={"<TablaEmpleado />"} />
+        <Route exac path="/admin/empleado/editar/:id" element={"<EditarEmpleado />"} />
+
+        <Route exac path='/admin/rol' element={"<AgregarRol />"} />
+        <Route exac path='/admin/rol/listar' element={"<TablaRol />"} />
+        <Route exac path='/admin/rol/editar/:id' element={"<EditarRol />"} />
+        {/* Rutas de confirmación protegidas */}
+        <Route path="/admin/producto/confirmacion" element={<PrivateRoute formType="producto" />}>
+          <Route index element={<ConfirmacionProducto />} />
+        </Route>
+
+        <Route exac path='/admin/empresa' element={"<AgregarEmpresa />"} />
+        <Route exac path='/admin/empresa/listar' element={"<TablaEmpresa />"} />
+        <Route exac path='/admin/empresa/editar/:id' element={"<EditarEmpresa />"} />
+
+        <Route exac path='/admin/proveedor' element={"<AgregarProveedor />"} />
+        <Route exac path='/admin/proveedor/listar' element={"<TablaProveedor />"} />
+        <Route exac path='/admin/proveedor/editar/:id' element={"<EditarProveedor />"} />
+
+        <Route exac path='/admin/categoria' element={"<AgregarCategoria />"} />
+        <Route exac path='/admin/categoria/listar' element={"<TablaCategoria />"} />
+        <Route exac path='/admin/categoria/editar/:id' element={"<EditarCategoria />"} />
+
+        <Route exac path='/admin/producto' element={<Producto />} />
+        <Route exac path='/admin/producto/listar' element={"<TablaProducto />"} />
+        <Route exac path='/admin/producto/editar/:id' element={"<EditarProducto />"} />
+
+        <Route exac path='/admin/cliente' element={"<AgregarCliente />"} />
+        <Route exac path='/admin/cliente/listar' element={"<TablaCliente />"} />
+        <Route exac path='/admin/cliente/editar/:id' element={"<EditarCliente />"} />
+
+        {/* <Route exac path='/admin/venta' element={<AgregarVenta />} />
+        <Route exac path='/admin/venta/listar' element={<TablaVentas />} /> */}
+
+
+        <Route path="*" element={<NotFound />} />
+
+      </Routes>
+    </>
+  );
+}
+
+function PublicRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+
+  );
+}
+function RoutesEmpleados() {
+
+  return (
+    <>
+
+      <Routes>
+
+        <Route exac path='/empleado' element={<Panel />} />
+        <Route exac path='/empleado/empresa' element={"hola"} />
+        <Route exac path='/empleado/empresa/listar' element={"hola"} />
+        <Route exac path='/empleado/empresa/editar/:id' element={"hola"} />
+
+        <Route exac path='/empleado/proveedor' element={"hola"} />
+        <Route exac path='/empleado/proveedor/listar' element={"<TablaProveedor />"} />
+        <Route exac path='/empleado/proveedor/editar/:id' element={"<EditarProveedor />"} />
+
+        <Route exac path='/empleado/categoria' element={"<AgregarCategoria />"} />
+        <Route exac path='/empleado/categoria/listar' element={"<TablaCategoria />"} />
+        <Route exac path='/empleado/categoria/editar/:id' element={"<EditarCategoria />"} />
+
+        <Route exac path='/empleado/producto' element={"<AgregarProducto />"} />
+        <Route exac path='/empleado/producto/listar' element={"<TablaProducto />"} />
+        <Route exac path='/empleado/producto/editar/:id' element={"<EditarProducto />"} />
+
+        <Route exac path='/empleado/cliente' element={"<EditarProducto />"} />
+        <Route exac path='/empleado/cliente/listar' element={"<EditarProducto />"} />
+        <Route exac path='/empleado/cliente/editar/:id' element={"<EditarProducto />"} />
+
+        {/*<Route exac path='/empleado/venta' element={<AgregarVenta />} />
+        <Route exac path='/empleado/venta/listar' element={<TablaVentas />} />
+ */}
+
+        <Route path="*" element={<NotFound />} />
+
+      </Routes>
+
+    </>
+  );
+}
+
+
+export default App;
+/*
       {!hideNavbar && <Navegador />}
       <Suspense fallback={<Progress />}>
         <Routes>
@@ -60,9 +188,4 @@ function App() {
           <Route path="/proveedor" element={<Proveedor />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </Suspense>
-    </>
-  );
-}
-
-export default App;
+      </Suspense>*/

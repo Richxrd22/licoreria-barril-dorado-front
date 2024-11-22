@@ -1,7 +1,7 @@
 import { Input, Select, SelectItem } from '@nextui-org/react';
 import { useFormik } from 'formik';
 import React from 'react'
-import { validationSchema } from './validacion';
+import { validacionProveedor } from '../../validaciones/validacionProveedor';
 
 export default function ProveedorForm() {
   const formik = useFormik({
@@ -13,7 +13,7 @@ export default function ProveedorForm() {
       celular: "",
       id_empresa: "",
     },
-    validationSchema: validationSchema,
+    validationSchema: validacionProveedor,
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       /* try {
               const token = await login(values);

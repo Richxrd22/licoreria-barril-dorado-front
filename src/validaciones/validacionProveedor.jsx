@@ -1,6 +1,6 @@
 import * as yup from "yup";
 
-export const validationSchema = yup.object({
+export const validacionProveedor = yup.object({
   nombre: yup
     .string("Ingrese el nombre del proveedor")
     .required("Campo Obligatorio"),

@@ -1,7 +1,7 @@
 export const rutas_navegador = [
     {
         id: 1,
-        ruta: "/panel",
+        ruta: "",
         nombre: "Panel"
     },
     {
@@ -11,10 +11,9 @@ export const rutas_navegador = [
     },
     {
         id: 3,
-        ruta: "/empleados",
+        ruta: "/empleado",
         nombre: "Empleados"
     },
-    
     {
         id: 4,
         ruta: "/empresa",
@@ -27,7 +26,7 @@ export const rutas_navegador = [
     }
 ]
 
-export const rutas_usuario =[
+export const rutas_usuario = [
     {
         id: 6,
         ruta: "/perfil",
@@ -43,7 +42,7 @@ export const rutas_usuario =[
         ruta: "",
         nombre: "Salir"
     }
-    
+
 ]
 
-export const rutas=[...rutas_navegador,...rutas_usuario]
+export const rutas = [...rutas_navegador, ...rutas_usuario]

@@ -1,6 +1,6 @@
 import * as yup from "yup";
 
-const validationSchema = yup.object({
+const validacionEmpleado = yup.object({
   nombre: yup
     .string()
     .required("El nombre es obligatorio")
@@ -35,4 +35,4 @@ const validationSchema = yup.object({
     .max(100, "La dirección no puede tener más de 100 caracteres"),
 });
 
-export default validationSchema;
+export default validacionEmpleado;

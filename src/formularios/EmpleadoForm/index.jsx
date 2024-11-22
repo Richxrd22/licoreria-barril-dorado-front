@@ -1,7 +1,7 @@
 import { Input } from "@nextui-org/react";
 import { useFormik } from "formik";
 import React from "react";
-import validationSchema from "./validacion";
+import validacionEmpleado from "../../validaciones/validacionEmpleado";
 
 export default function EmpleadoForm() {
   const formik = useFormik({
@@ -13,7 +13,7 @@ export default function EmpleadoForm() {
       celular: "",
       direccion: "",
     },
-    validationSchema: validationSchema,
+    validationSchema: validacionEmpleado,
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       /* try {
               const token = await login(values);
