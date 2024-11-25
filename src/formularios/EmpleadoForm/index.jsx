@@ -1,41 +1,62 @@
-import { Input } from "@nextui-org/react";
+import { Button, Input } from "@nextui-org/react";
 import { useFormik } from "formik";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import validacionEmpleado from "../../validaciones/validacionEmpleado";
+import { empleadoService } from "../../services/EmpleadoService";
+import { useFormulario } from "../../context/FormularioContext";
+import { useNavigate } from "react-router-dom";
 
-export default function EmpleadoForm() {
+export default function EmpleadoForm({onClose}) {
+  const [empleados, setEmpleados] = useState([]);
+  const { markFormAsSubmitted } = useFormulario();  // Función para actualizar el estado
+  const navigate = useNavigate();
+  const fetchProductos = async () => {
+    try {
+      const data = await empleadoService.listarEmpleado();
+      setEmpleados(data);
+    } catch (error) {
+      console.error("Error al obtener empleados:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProductos();
+  }, []);
+
   const formik = useFormik({
     initialValues: {
       nombre: "",
       apellido: "",
       dni: "",
-      correo: "",
-      celular: "",
+      correo_personal: "",
+      telefono: "",
       direccion: "",
+      activo:1,
+      id_rol: 2,
     },
-    validationSchema: validacionEmpleado,
+    validationSchema: validacionEmpleado(empleados),
     onSubmit: async (values, { setSubmitting, resetForm }) => {
-      /* try {
-              const token = await login(values);
-              localStorage.setItem("token", token);
-      
-              const decodedToken = jwtDecode(token);
-              const idRol = decodedToken.id_rol;
-      
-              // Redirige según el rol del usuario
-              if (idRol === 1) {
-                navigate("/admin");
-              } else {
-                navigate("/user");
-              }
-      
-              resetForm(); // Limpia el formulario tras inicio de sesión exitoso
-            } catch (error) {
-              console.log("Error al iniciar sesión. Verifica tus credenciales.");
-              
-            } finally {
-              setSubmitting(false); // Detiene el estado de "submitting"
-            }*/
+      try {
+        await empleadoService.registrarEmpleado(values);
+        console.log(values)
+        // Reseteamos el formulario solo si deseas limpiar los campos después del envío
+        resetForm();
+        onClose();
+        // Actualizamos el estado del formulario como "enviado"
+        markFormAsSubmitted('empleado');
+
+        // Redirigimos a la ruta de confirmación del producto
+        navigate("/admin/empleado/confirmacion", {
+          state: {
+            mensaje: `Empleado ${values.nombre} Registrado con Exito`,
+          },
+        });
+
+      } catch (error) {
+        console.error("Error al registrar empleado:", error);
+      } finally {
+        setSubmitting(false);
+      }
     },
   });
   return (
@@ -88,14 +109,14 @@ export default function EmpleadoForm() {
           type="email"
           label="Correo"
           placeholder="Introduce el Correo del Empleado"
-          id="correo"
-          name="correo"
-          value={formik.values.correo}
+          id="correo_personal"
+          name="correo_personal"
+          value={formik.values.correo_personal}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          onError={() => formik.touched.correo && Boolean(formik.errors.correo)}
-          isInvalid={formik.touched.correo && Boolean(formik.errors.correo)}
-          errorMessage={formik.touched.correo && formik.errors.correo}
+          onError={() => formik.touched.correo_personal && Boolean(formik.errors.correo_personal)}
+          isInvalid={formik.touched.correo_personal && Boolean(formik.errors.correo_personal)}
+          errorMessage={formik.touched.correo_personal && formik.errors.correo_personal}
         />
       </div>
       <div className="flex gap-5">
@@ -103,16 +124,16 @@ export default function EmpleadoForm() {
           type="text"
           label="Celular"
           placeholder="Introduce el Celular del Empleado"
-          id="celular"
-          name="celular"
-          value={formik.values.celular}
+          id="telefono"
+          name="telefono"
+          value={formik.values.telefono}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           onError={() =>
-            formik.touched.celular && Boolean(formik.errors.celular)
+            formik.touched.telefono && Boolean(formik.errors.telefono)
           }
-          isInvalid={formik.touched.celular && Boolean(formik.errors.celular)}
-          errorMessage={formik.touched.celular && formik.errors.celular}
+          isInvalid={formik.touched.telefono && Boolean(formik.errors.telefono)}
+          errorMessage={formik.touched.telefono && formik.errors.telefono}
         />
         <Input
           type="text"
@@ -132,6 +153,11 @@ export default function EmpleadoForm() {
           errorMessage={formik.touched.direccion && formik.errors.direccion}
         />
       </div>
+      <div className="pb-5">
+      <Button color="primary" type="submit">Registrar</Button>
+
+      </div>
+
     </form>
   );
 }

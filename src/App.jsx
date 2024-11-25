@@ -6,7 +6,6 @@ import Navegador from "./componentes/Navegador";
 import { jwtDecode } from "jwt-decode";
 import { FormularioProvider } from "./context/FormularioContext";
 import PrivateRoute from "./adicionales/PrivateRoute";
-import ConfirmacionProducto from "./formularios/ProductoForm/ConfirmacionProducto";
 const NotFound = lazy(() => import("./paginas/NotFound"));
 const Login = lazy(() => import("./paginas/Login"));
 const Panel = lazy(() => import("./paginas/Panel"));
@@ -14,6 +13,7 @@ const Producto = lazy(() => import("./paginas/Producto"));
 const Proveedor = lazy(() => import("./paginas/Proveedor"));
 const Empleados = lazy(() => import("./paginas/Empleados"));
 const Empresa = lazy(() => import("./paginas/Empresa"));
+const Confirmacion = lazy(() => import("./componentes/Confirmacion"))
 function App() {
   const [hideNavbar, setHideNavbar] = useState(false);
   const location = useLocation();
@@ -30,7 +30,7 @@ function App() {
     }
   }, [role, isAuthenticated]);
 
-  
+
   useEffect(() => {
     const handledRoutes = [
       "/",
@@ -50,7 +50,8 @@ function App() {
       "/empleado/empleado",
       "/empleado/empresa",
       "/empleado/proveedor",
-      "/admin/producto/confirmacion"
+      "/admin/producto/confirmacion",
+      "/admin/empleado/confirmacion",
     ];
     setHideNavbar(!handledRoutes.includes(location.pathname));
   }, [location.pathname]);
@@ -80,7 +81,7 @@ function RoutesAdministrador() {
       <Routes>
         <Route exac path='/admin' element={<Panel />} />
         <Route exac path='/admin/usuario/listar' element={"<TablaUsuario />"} />
-        <Route exac path="/admin/empleado" element={"<AgregarEmpleado />"} />
+        <Route exac path="/admin/empleado" element={<Empleados />} />
         <Route exac path="/admin/empleado/listar" element={"<TablaEmpleado />"} />
         <Route exac path="/admin/empleado/editar/:id" element={"<EditarEmpleado />"} />
 
@@ -89,7 +90,11 @@ function RoutesAdministrador() {
         <Route exac path='/admin/rol/editar/:id' element={"<EditarRol />"} />
         {/* Rutas de confirmación protegidas */}
         <Route path="/admin/producto/confirmacion" element={<PrivateRoute formType="producto" />}>
-          <Route index element={<ConfirmacionProducto />} />
+          <Route index element={<Confirmacion ruta={"/admin/producto"} />} />
+        </Route>
+
+        <Route path="/admin/empleado/confirmacion" element={<PrivateRoute formType="empleado" />}>
+          <Route index element={<Confirmacion ruta={"/admin/empleado"} />} />
         </Route>
 
         <Route exac path='/admin/empresa' element={"<AgregarEmpresa />"} />
@@ -105,8 +110,6 @@ function RoutesAdministrador() {
         <Route exac path='/admin/categoria/editar/:id' element={"<EditarCategoria />"} />
 
         <Route exac path='/admin/producto' element={<Producto />} />
-        <Route exac path='/admin/producto/listar' element={"<TablaProducto />"} />
-        <Route exac path='/admin/producto/editar/:id' element={"<EditarProducto />"} />
 
         <Route exac path='/admin/cliente' element={"<AgregarCliente />"} />
         <Route exac path='/admin/cliente/listar' element={"<TablaCliente />"} />

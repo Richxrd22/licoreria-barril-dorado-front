@@ -9,6 +9,7 @@ export function FormularioProvider({ children }) {
     categoria: false,
     proveedor: false,
     empresa: false,
+    empleado:false,
   });
 
   const markFormAsSubmitted = (formType) => {

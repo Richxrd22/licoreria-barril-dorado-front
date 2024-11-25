@@ -96,7 +96,7 @@ export default function InfoProducto({ onClose, productId }) {
         </div>
       </ModalBody>
       <ModalFooter>
-        <Button color="danger" variant="light" onPress={onClose}>
+        <Button color="danger" variant="solid" onPress={onClose}>
           Cerrar
         </Button>
       </ModalFooter>
