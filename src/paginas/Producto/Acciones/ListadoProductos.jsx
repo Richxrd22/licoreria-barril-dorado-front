@@ -24,24 +24,30 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import Texto from "../../../componentes/Texto";
-import { columns, statusOptions } from "./adicionales/datos";
+import {
+  columns,
+  statusOptionsActivo,
+  statusOptionsEstadoCantidad,
+} from "./adicionales/datos";
 import { VerticalDotsIcon } from "../../../../public/Icons/VerticalDotsIcon";
 import { SearchIcon } from "../../../../public/Icons/SearchIcon";
 import { ChevronDownIcon } from "../../../../public/Icons/ChevronDownIcon";
 import { capitalize } from "../../../adicionales/utils";
 import { productoService } from "../../../services/ProductoService";
-import EditarProducto from "././EditarProducto"
-import GestionarStock from "././GestionarStock"
-import InfoProducto from "././InfoProducto"
-
+import EditarProducto from "././EditarProducto";
+import GestionarStock from "././GestionarStock";
+import InfoProducto from "././InfoProducto";
+import GestionActivo from "./GestionActivo";
+import { jwtDecode } from "jwt-decode";
 export default function ListadoProductos() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  //hook para obtener productos con stock
+
   const INITIAL_VISIBLE_COLUMNS = [
     "nombre",
     "descripcion",
     "cantidad",
     "estado_cantidad",
+    "activo",
     "acciones",
   ];
   const [selectedProductId, setSelectedProductId] = useState(null);
@@ -50,8 +56,11 @@ export default function ListadoProductos() {
   const [visibleColumns, setVisibleColumns] = React.useState(
     new Set(INITIAL_VISIBLE_COLUMNS)
   );
-  const [statusFilter, setStatusFilter] = React.useState("all");
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Tamaño de página
+  const [statusFilterActivo, setStatusFilterActivo] = useState(new Set(["1"]));
+  const [statusFilterEstadoStock, setStatusFilterEstadoStock] = useState(
+    new Set(["1"])
+  );
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [sortDescriptor, setSortDescriptor] = React.useState({
     column: "id_producto",
     direction: "ascending",
@@ -60,10 +69,29 @@ export default function ListadoProductos() {
   const [page, setPage] = useState(1);
   const hasSearchFilter = Boolean(filterValue);
 
+  const getDecodedToken = () => {
+    const miToken = localStorage.getItem("token");
+    if (miToken) {
+      try {
+        return jwtDecode(miToken); // Decodificamos el token
+      } catch (error) {
+        console.error("Error al decodificar el token:", error);
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const rol = useMemo(() => {
+    const decodedToken = getDecodedToken();
+    return decodedToken?.roles?.includes("ROLE_ADMIN");
+  }, []);
+
   const fetchProductos = async () => {
     try {
       const data = await productoService.listarProducto();
       setProductos(data);
+      console.log(data);
     } catch (error) {
       console.error("Error al obtener productos:", error);
     }
@@ -84,25 +112,35 @@ export default function ListadoProductos() {
   const filteredItems = useMemo(() => {
     let filteredProduct = [...productos];
 
-    // Filtrado por nombre
-    if (hasSearchFilter) {
+    // Filtro por búsqueda en nombre
+    if (filterValue) {
       filteredProduct = filteredProduct.filter((product) =>
         product.nombre.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
 
-    // Filtrado por estado (Disponible/Agotado)
-    if (statusFilter !== "all" && statusFilter.size > 0) {
-      const selectedStatuses = Array.from(statusFilter).map((key) =>
-        Number(key)
-      ); // Convertir a número
+    // Filtro por estado_cantidad (1: Disponible, 0: Agotado)
+    if (statusFilterEstadoStock.size > 0) {
+      const selectedEstadosCantidad = Array.from(statusFilterEstadoStock).map(
+        (key) => parseInt(key, 10)
+      );
       filteredProduct = filteredProduct.filter((product) =>
-        selectedStatuses.includes(Number(product.estado_cantidad))
+        selectedEstadosCantidad.includes(product.estado_cantidad)
+      );
+    }
+
+    // Filtro por activo (1: Activo, 0: Inactivo)
+    if (statusFilterActivo.size > 0) {
+      const selectedStatuses = Array.from(statusFilterActivo).map((key) =>
+        parseInt(key, 10)
+      );
+      filteredProduct = filteredProduct.filter((product) =>
+        selectedStatuses.includes(product.activo)
       );
     }
 
     return filteredProduct;
-  }, [productos, filterValue, statusFilter]);
+  }, [productos, filterValue, statusFilterEstadoStock, statusFilterActivo]);
 
   const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
@@ -139,9 +177,9 @@ export default function ListadoProductos() {
             className="capitalize"
             size="sm"
             variant="flat"
-            color={product.estado_cantidad ? "success" : "danger"}
+            color={product.estado_cantidad === 1 ? "success" : "danger"}
           >
-            {product.estado_cantidad === true ? "Disponible" : "Agotado"}
+            {product.estado_cantidad === 1 ? "Disponible" : "Agotado"}
           </Chip>
         );
       case "fecha_produccion":
@@ -150,6 +188,17 @@ export default function ListadoProductos() {
         return <span>{product.fecha_vencimiento}</span>;
       case "categoria":
         return <span>{product.categoria}</span>;
+      case "activo":
+        return (
+          <Chip
+            className="capitalize"
+            size="sm"
+            variant="flat"
+            color={product.activo === 1 ? "success" : "danger"}
+          >
+            {product.activo === 1 ? "Activo" : "Inactivo"}
+          </Chip>
+        );
       case "acciones":
         return (
           <div className="relative flex justify-center items-center gap-2">
@@ -160,9 +209,33 @@ export default function ListadoProductos() {
                 </Button>
               </DropdownTrigger>
               <DropdownMenu>
-                <DropdownItem onPress={() => openModal(product.id_producto, "view")}>Ver</DropdownItem>
-                <DropdownItem onPress={() => openModal(product.id_producto, "stock")}>Stock</DropdownItem>
-                <DropdownItem onPress={() => openModal(product.id_producto, "edit")}>Editar</DropdownItem>
+                <DropdownItem
+                  onPress={() => openModal(product.id_producto, "view")}
+                >
+                  Ver
+                </DropdownItem>
+                {product.activo !== 0 && (
+                  <DropdownItem
+                    onPress={() => openModal(product.id_producto, "stock")}
+                  >
+                    Gestion Stock
+                  </DropdownItem>
+                )}
+                {rol && (
+                  <DropdownItem
+                    onPress={() => openModal(product.id_producto, "state")}
+                  >
+                    Cambiar Estado
+                  </DropdownItem>
+                )}
+
+                {product.activo !== 0 && (
+                  <DropdownItem
+                    onPress={() => openModal(product.id_producto, "edit")}
+                  >
+                    Editar
+                  </DropdownItem>
+                )}
               </DropdownMenu>
             </Dropdown>
           </div>
@@ -206,7 +279,18 @@ export default function ListadoProductos() {
   const openModal = (productId, action) => {
     setSelectedProductId(productId);
     setModalAction(action);
-    onOpen(); // Abre el modal
+    onOpen();
+  };
+  const actualizarTabla = (productoActualizado) => {
+    setProductos((prevProductos) => {
+      // Asegúrate de que el producto actualizado se está agregando correctamente.
+      return prevProductos.map((producto) =>
+        producto.id_producto === productoActualizado.id_producto
+          ? { ...producto, ...productoActualizado } // Usar spread operator para actualizar las propiedades
+          : producto
+      );
+    });
+    console.log(productoActualizado);
   };
 
   const topContent = React.useMemo(() => {
@@ -229,6 +313,35 @@ export default function ListadoProductos() {
                   endContent={<ChevronDownIcon className="text-small" />}
                   variant="flat"
                 >
+                  Estado Cantidad
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                disallowEmptySelection
+                aria-label="Filtrar por estado cantidad"
+                closeOnSelect={false}
+                selectedKeys={statusFilterEstadoStock}
+                selectionMode="multiple"
+                onSelectionChange={(keys) =>
+                  setStatusFilterEstadoStock(new Set([...keys]))
+                }
+              >
+                {statusOptionsEstadoCantidad.map((status) => (
+                  <DropdownItem
+                    key={status.uid.toString()}
+                    className="capitalize"
+                  >
+                    {status.name}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+            <Dropdown>
+              <DropdownTrigger className="hidden sm:flex">
+                <Button
+                  endContent={<ChevronDownIcon className="text-small" />}
+                  variant="flat"
+                >
                   Estado
                 </Button>
               </DropdownTrigger>
@@ -236,19 +349,23 @@ export default function ListadoProductos() {
                 disallowEmptySelection
                 aria-label="Filtrar por estado"
                 closeOnSelect={false}
-                selectedKeys={statusFilter}
+                selectedKeys={statusFilterActivo}
                 selectionMode="multiple"
                 onSelectionChange={(keys) =>
-                  setStatusFilter(new Set([...keys]))
+                  setStatusFilterActivo(new Set([...keys]))
                 }
               >
-                {statusOptions.map((status) => (
-                  <DropdownItem key={status.uid} className="capitalize">
-                    {capitalize(status.name)}
+                {statusOptionsActivo.map((status) => (
+                  <DropdownItem
+                    key={status.uid.toString()}
+                    className="capitalize"
+                  >
+                    {status.name}
                   </DropdownItem>
                 ))}
               </DropdownMenu>
             </Dropdown>
+
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
                 <Button
@@ -295,7 +412,8 @@ export default function ListadoProductos() {
     );
   }, [
     filterValue,
-    statusFilter,
+    statusFilterEstadoStock,
+    statusFilterActivo,
     visibleColumns,
     onRowsPerPageChange,
     productos.length,
@@ -317,7 +435,7 @@ export default function ListadoProductos() {
         />
         <div className="hidden sm:flex w-[30%] justify-end gap-2">
           <Button
-            isDisabled={page === 1} // Cambié `pages === 1` a `page === 1`
+            isDisabled={page === 1}
             size="sm"
             variant="flat"
             onPress={onPreviousPage}
@@ -325,7 +443,7 @@ export default function ListadoProductos() {
             Anterior
           </Button>
           <Button
-            isDisabled={page === pages} // Cambié `pages === 1` a `page === pages`
+            isDisabled={page === pages}
             size="sm"
             variant="flat"
             onPress={onNextPage}
@@ -335,7 +453,7 @@ export default function ListadoProductos() {
         </div>
       </div>
     );
-  }, [page, pages]); // Solo dependencias relevantes
+  }, [page, pages]);
 
   return (
     <>
@@ -373,16 +491,46 @@ export default function ListadoProductos() {
           )}
         </TableBody>
       </Table>
-      <Modal size={modalAction === "edit" && "2xl"} isOpen={isOpen} onOpenChange={onOpenChange}>
-        <ModalContent >
+
+      <Modal
+        size={modalAction === "edit" && "2xl"}
+        hideCloseButton={modalAction === "state" && true}
+        isDismissable={modalAction === "state" ? false : true}
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+      >
+        <ModalContent>
           {(onClose) => {
             switch (modalAction) {
               case "view":
-                return <InfoProducto onClose={onClose} productId={selectedProductId} />;
+                return (
+                  <InfoProducto
+                    onClose={onClose}
+                    productId={selectedProductId}
+                  />
+                );
               case "stock":
-                return <GestionarStock onClose={onClose} productId={selectedProductId} />;
+                return (
+                  <GestionarStock
+                    onClose={onClose}
+                    productId={selectedProductId}
+                  />
+                );
               case "edit":
-                return <EditarProducto onClose={onClose} productId={selectedProductId} />;
+                return (
+                  <EditarProducto
+                    onClose={onClose}
+                    productId={selectedProductId}
+                  />
+                );
+              case "state":
+                return (
+                  <GestionActivo
+                    actualizarTabla={actualizarTabla}
+                    onClose={onClose}
+                    productId={selectedProductId}
+                  />
+                );
               default:
                 return null;
             }

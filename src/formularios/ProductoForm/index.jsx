@@ -24,6 +24,7 @@ export default function ProductoForm({ onClose }) {
 
   const [categorias, setCategorias] = useState([]);
   const [proveedores, setProveedores] = useState([]);
+  const [productos,setProductos]=useState([]);
   const { markFormAsSubmitted } = useFormulario();  // Función para actualizar el estado
   const navigate = useNavigate();
   const formik = useFormik({
@@ -37,8 +38,9 @@ export default function ProductoForm({ onClose }) {
       fecha_vencimiento: null,
       id_categoria: "",
       id_proveedor: "",
+      activo:1
     },
-    validationSchema: validacionProducto,
+    validationSchema: validacionProducto(productos),
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
         // Convertimos las fechas a formato YYYY-MM-DD si es necesario
@@ -76,6 +78,16 @@ export default function ProductoForm({ onClose }) {
     ,
   });
 
+  const fetchProductos = async () => {
+    try {
+      const data = await productoService.listarProducto();
+      setProductos(data);
+    } catch (error) {
+      console.error("Error al obtener empresas:", error);
+    }
+  };
+
+
   const fetchCategorias = async () => {
     try {
       const data = await categoriaService.listarCategoria();
@@ -101,6 +113,7 @@ export default function ProductoForm({ onClose }) {
   useEffect(() => {
     fetchCategorias();
     fetchProveedores();
+    fetchProductos();
   }, []);
 
   return (

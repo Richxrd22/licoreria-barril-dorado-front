@@ -52,6 +52,7 @@ function App() {
       "/empleado/proveedor",
       "/admin/producto/confirmacion",
       "/admin/empleado/confirmacion",
+      "/admin/empresa/confirmacion",
     ];
     setHideNavbar(!handledRoutes.includes(location.pathname));
   }, [location.pathname]);
@@ -80,15 +81,9 @@ function RoutesAdministrador() {
 
       <Routes>
         <Route exac path='/admin' element={<Panel />} />
-        <Route exac path='/admin/usuario/listar' element={"<TablaUsuario />"} />
-        <Route exac path="/admin/empleado" element={<Empleados />} />
-        <Route exac path="/admin/empleado/listar" element={"<TablaEmpleado />"} />
-        <Route exac path="/admin/empleado/editar/:id" element={"<EditarEmpleado />"} />
 
-        <Route exac path='/admin/rol' element={"<AgregarRol />"} />
-        <Route exac path='/admin/rol/listar' element={"<TablaRol />"} />
-        <Route exac path='/admin/rol/editar/:id' element={"<EditarRol />"} />
-        {/* Rutas de confirmación protegidas */}
+        <Route exac path="/admin/empleado" element={<Empleados />} />
+      
         <Route path="/admin/producto/confirmacion" element={<PrivateRoute formType="producto" />}>
           <Route index element={<Confirmacion ruta={"/admin/producto"} />} />
         </Route>
@@ -97,27 +92,17 @@ function RoutesAdministrador() {
           <Route index element={<Confirmacion ruta={"/admin/empleado"} />} />
         </Route>
 
-        <Route exac path='/admin/empresa' element={"<AgregarEmpresa />"} />
-        <Route exac path='/admin/empresa/listar' element={"<TablaEmpresa />"} />
-        <Route exac path='/admin/empresa/editar/:id' element={"<EditarEmpresa />"} />
+        <Route path="/admin/empresa/confirmacion" element={<PrivateRoute formType="empresa" />}>
+          <Route index element={<Confirmacion ruta={"/admin/empresa"} />} />
+        </Route> 
+
+        <Route exac path='/admin/empresa' element={<Empresa/>} />
 
         <Route exac path='/admin/proveedor' element={"<AgregarProveedor />"} />
-        <Route exac path='/admin/proveedor/listar' element={"<TablaProveedor />"} />
-        <Route exac path='/admin/proveedor/editar/:id' element={"<EditarProveedor />"} />
 
         <Route exac path='/admin/categoria' element={"<AgregarCategoria />"} />
-        <Route exac path='/admin/categoria/listar' element={"<TablaCategoria />"} />
-        <Route exac path='/admin/categoria/editar/:id' element={"<EditarCategoria />"} />
 
         <Route exac path='/admin/producto' element={<Producto />} />
-
-        <Route exac path='/admin/cliente' element={"<AgregarCliente />"} />
-        <Route exac path='/admin/cliente/listar' element={"<TablaCliente />"} />
-        <Route exac path='/admin/cliente/editar/:id' element={"<EditarCliente />"} />
-
-        {/* <Route exac path='/admin/venta' element={<AgregarVenta />} />
-        <Route exac path='/admin/venta/listar' element={<TablaVentas />} /> */}
-
 
         <Route path="*" element={<NotFound />} />
 

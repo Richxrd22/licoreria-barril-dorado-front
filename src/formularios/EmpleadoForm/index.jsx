@@ -8,9 +8,9 @@ import { useNavigate } from "react-router-dom";
 
 export default function EmpleadoForm({onClose}) {
   const [empleados, setEmpleados] = useState([]);
-  const { markFormAsSubmitted } = useFormulario();  // Función para actualizar el estado
+  const { markFormAsSubmitted } = useFormulario(); 
   const navigate = useNavigate();
-  const fetchProductos = async () => {
+  const fetchEmpleados = async () => {
     try {
       const data = await empleadoService.listarEmpleado();
       setEmpleados(data);
@@ -20,7 +20,7 @@ export default function EmpleadoForm({onClose}) {
   };
 
   useEffect(() => {
-    fetchProductos();
+    fetchEmpleados();
   }, []);
 
   const formik = useFormik({
@@ -38,14 +38,10 @@ export default function EmpleadoForm({onClose}) {
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
         await empleadoService.registrarEmpleado(values);
-        console.log(values)
-        // Reseteamos el formulario solo si deseas limpiar los campos después del envío
         resetForm();
         onClose();
-        // Actualizamos el estado del formulario como "enviado"
         markFormAsSubmitted('empleado');
 
-        // Redirigimos a la ruta de confirmación del producto
         navigate("/admin/empleado/confirmacion", {
           state: {
             mensaje: `Empleado ${values.nombre} Registrado con Exito`,

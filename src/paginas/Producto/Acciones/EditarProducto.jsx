@@ -8,23 +8,37 @@ import { categoriaService } from "../../../services/CategoriaService";
 import { productoService } from "../../../services/ProductoService";
 import Progress from "../../../componentes/Progress";
 import { validacionProducto } from "../../../validaciones/validacionProducto";
+import { validacionProductoActualizar } from "../../../validaciones/validacionProductoActualizar";
 
 export default function EditarProducto({ onClose, productId }) {
   const [categorias, setCategorias] = useState([]);
   const [proveedores, setProveedores] = useState([]);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null)
+  const [productos,setProductos]=useState([])
   const { markFormAsSubmitted } = useFormulario(); // Función para actualizar el estado
   const navigate = useNavigate();
   const fetchProducto = async (productId) => {
     try {
       const producto = await productoService.obtenerproductoId(productId);
-      // Seteamos los valores iniciales del formulario con los datos del producto
-      // Convertir las fechas a objetos Date
+      const productos = await productoService.listarProducto();
       setProductoSeleccionado(producto)
+      setProductos(productos)
       // Seteamos los valores iniciales del formulario
-      formik.setValues({
-        ...producto,
-        estado_cantidad: producto.estado_cantidad === true ? 1 : 0,
+      formik.resetForm({
+        values: {
+          id_producto:productId,
+          nombre: producto.nombre,
+          descripcion: producto.descripcion,
+          cantidad: producto.cantidad,
+          precio: producto.precio,
+          estado_cantidad: producto.estado_cantidad,
+          fecha_produccion: producto.fecha_produccion,
+          fecha_vencimiento: producto.fecha_vencimiento,
+          id_categoria: producto.id_categoria,
+          id_proveedor: producto.id_proveedor,
+          activo: producto.activo ,
+        }
+
       });
     } catch (error) {
       console.error("Error al obtener datos del producto:", error);
@@ -37,13 +51,14 @@ export default function EditarProducto({ onClose, productId }) {
       descripcion: "",
       cantidad: "",
       precio: "",
-      estado_cantidad: 1,
+      estado_cantidad: "",
       fecha_produccion: "",
       fecha_vencimiento: "",
       id_categoria: "",
       id_proveedor: "",
+      activo:""
     },
-    validationSchema: validacionProducto,
+    validationSchema: validacionProductoActualizar(productos,productoSeleccionado),
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       setSubmitting(true);
       try {
@@ -117,7 +132,7 @@ export default function EditarProducto({ onClose, productId }) {
               id="id_categoria"
               name="id_categoria"
               label="Categoria"
-              selectedKeys={new Set([formik.values.id_categoria])}
+              selectedKeys={new Set([formik.values.id_categoria.toString()])}
               onChange={formik.handleChange}
               onBlur={() => formik.handleBlur("id_categoria")}
               onError={() =>
@@ -158,7 +173,7 @@ export default function EditarProducto({ onClose, productId }) {
               placeholder="Selecciona un Proveedor"
               id="id_proveedor"
               name="id_proveedor"
-              selectedKeys={new Set([formik.values.id_proveedor])}
+              selectedKeys={new Set([formik.values.id_proveedor.toString()])}
               onChange={formik.handleChange}
               onBlur={() => formik.handleBlur("id_proveedor")}
               onError={() =>
@@ -274,8 +289,9 @@ export default function EditarProducto({ onClose, productId }) {
           />
           <div className="pb-5">
             <Button
-              type="submit" // Aquí el tipo "submit" funcionará porque está dentro del form
+              type="submit" 
               color="primary"
+              disabled={!formik.dirty || formik.isSubmitting}
             >
               Actualizar
             </Button>

@@ -1,59 +1,75 @@
-import { Button, Input } from "@nextui-org/react";
-import { useFormik } from "formik";
-import React, { useEffect, useState } from "react";
-import validacionEmpresa from "../../validaciones/validacionEmpresa";
-import { useFormulario } from "../../context/FormularioContext";
-import { useNavigate } from "react-router-dom";
-import { empresaService } from "../../services/EmpresaService";
+import React, { useEffect, useState } from 'react'
+import { useFormulario } from '../../../context/FormularioContext';
+import { useNavigate } from 'react-router-dom';
+import { empresaService } from '../../../services/EmpresaService';
+import { Button, Input, ModalBody, ModalHeader } from '@nextui-org/react';
+import { useFormik } from 'formik';
+import { validacionEmpresaActualizar } from '../../../validaciones/validacionEmpresaActualizar';
 
-export default function EmpresaForm({onClose}) {
-  const [empresas, setEmpresa] = useState([])
-  const { markFormAsSubmitted } = useFormulario();  // Función para actualizar el estado
+export default function EditarEmpresa({ onClose, empresaId }) {
+  const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null)
+  const [empresasExistentes, setEmpresasExistentes] = useState([])
+  const { markFormAsSubmitted } = useFormulario(); 
   const navigate = useNavigate();
 
-  const fetchEmpresa = async () => {
-    try {
-      const data = await empresaService.listarEmpresas();
-      setEmpresa(data);
-    } catch (error) {
-      console.error("Error al obtener empresas:", error);
-    }
-  };
-
   useEffect(() => {
-    fetchEmpresa();
-  }, []);
+    const cargarDatos = async () => {
+      try {
+        const empresaBuscado = await empresaService.obtenerEmpresaId(empresaId);
+        setEmpresaSeleccionada(empresaBuscado);
+
+        const data = await empresaService.listarEmpresas();
+        setEmpresasExistentes(data);
+
+        formik.resetForm({
+          values: {
+            ...empresaBuscado
+          },
+        });
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+      }
+    };
+
+    if (empresaId) {
+      cargarDatos();
+    }
+  }, [empresaId]); 
+
   const formik = useFormik({
     initialValues: {
-      nombre: "",
+      id_empleado: "",
+      nombre:"",
       ruc: "",
       website: "",
     },
-    validationSchema: validacionEmpresa(empresas),
+    validationSchema: validacionEmpresaActualizar(empresasExistentes, empresaSeleccionada),
     onSubmit: async (values, { setSubmitting, resetForm }) => {
+      setSubmitting(true);
       try {
-        await empresaService.registrarEmpresa(values);
-        // Reseteamos el formulario solo si deseas limpiar los campos después del envío
+
+        await empresaService.editarEmpresa(values);
+
         resetForm();
         onClose();
-        // Actualizamos el estado del formulario como "enviado"
-        markFormAsSubmitted('empresa');
-
-        // Redirigimos a la ruta de confirmación del producto
+        markFormAsSubmitted("empresa");
         navigate("/admin/empresa/confirmacion", {
           state: {
-            mensaje: `Empresa ${values.nombre} Registrada con Exito`,
+            mensaje: `Los Datos de la Empresa ${values.nombre} se actualizo con éxito`,
           },
         });
-
       } catch (error) {
-        console.error("Error al registrar empresa:", error);
+        console.error("Error al Actualizar la Empresa:", error);
       } finally {
-        setSubmitting(false);
+        setSubmitting(false); 
       }
     },
   });
+
   return (
+    <>
+    <ModalHeader>Editar Empresa</ModalHeader>
+    <ModalBody>
     <form onSubmit={formik.handleSubmit} className="space-y-6">
       <div className="flex gap-5">
         <Input
@@ -101,10 +117,12 @@ export default function EmpresaForm({onClose}) {
         />
       </div>
       <div className="pb-5">
-        <Button type="submit" color="primary" disabled={formik.isSubmitting}>
+        <Button type="submit" color="primary" disabled={!formik.dirty || formik.isSubmitting}>
           Registrar
         </Button>
       </div>
     </form>
-  );
+    </ModalBody>
+    </>
+  )
 }

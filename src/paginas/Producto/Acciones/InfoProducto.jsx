@@ -54,7 +54,7 @@ export default function InfoProducto({ onClose, productId }) {
               className="capitalize"
               size="sm"
               variant="flat"
-              color={producto.estado_cantidad ? "success" : "error"}
+              color={producto.estado_cantidad ? "success" : "danger"}
             >
               {producto.estado_cantidad ? "Disponible" : "Agotado"}
             </Chip>

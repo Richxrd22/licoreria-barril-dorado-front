@@ -1,77 +1,51 @@
-import {
-  Button,
-  Chip,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
-  Input,
-  Modal,
-  ModalContent,
-  Pagination,
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-  useDisclosure,
-} from "@nextui-org/react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import InfoEmpleado from "././InfoEmpleado";
-import Texto from "../../../componentes/Texto";
-import { capitalize } from "../../../adicionales/utils";
-import { columns, statusOptions } from "./adicionales/datos";
-import { VerticalDotsIcon } from "../../../../public/Icons/VerticalDotsIcon";
-import { SearchIcon } from "../../../../public/Icons/SearchIcon";
-import { ChevronDownIcon } from "../../../../public/Icons/ChevronDownIcon";
-import { empleadoService } from "../../../services/EmpleadoService";
-import EditarEmpleado from "./EditarEmpleado";
-import GestionUsuario from "./GestionUsuario";
-import GestionActivo from "./GestionActivo";
-export default function ListadoEmpleados() {
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Modal, ModalContent, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { empresaService } from '../../../services/EmpresaService';
+import { columns } from './adicionales/datos';
+import { SearchIcon } from '../../../../public/Icons/SearchIcon';
+import { ChevronDownIcon } from '../../../../public/Icons/ChevronDownIcon';
+import Texto from '../../../componentes/Texto';
+import { capitalize } from '../../../adicionales/utils';
+import { VerticalDotsIcon } from '../../../../public/Icons/VerticalDotsIcon';
+import InfoEmpresa from './InfoEmpresa';
+import EditarEmpresa from './EditarEmpresa';
+
+export default function ListadoEmpresa() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  //hook para obtener empresas con stock
   const INITIAL_VISIBLE_COLUMNS = [
+    "id_empresa",
     "nombre",
-    "apellido",
-    "dni",
-    "correo_personal",
-    "correo_empresarial",
-    "activo",
+    "ruc",
+    "website",
     "acciones",
   ];
-
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
+  const [selectedEmpresaId, setSelectedEmpresaId] = useState(null);
   const [modalAction, setModalAction] = useState(null);
-  const [empleados, setEmpleados] = useState([]);
+  const [empresas, setEmpresas] = useState([]);
   const [visibleColumns, setVisibleColumns] = useState(
     new Set(INITIAL_VISIBLE_COLUMNS)
   );
-  const [statusFilter, setStatusFilter] = React.useState(new Set(["1"]));
+  const [statusFilter, setStatusFilter] = useState("all");
   const [rowsPerPage, setRowsPerPage] = useState(5); // Tamaño de página
-  const [sortDescriptor, setSortDescriptor] = React.useState({
-    column: "id_empleado",
+  const [sortDescriptor, setSortDescriptor] = useState({
+    column: "id_empresa",
     direction: "ascending",
   });
-  const [filterValue, setFilterValue] = React.useState("");
+  const [filterValue, setFilterValue] = useState("");
   const [page, setPage] = useState(1);
   const hasSearchFilter = Boolean(filterValue);
 
- 
-
-
-  const fetchEmpleados = async () => {
+  const fetchEmpresas = async () => {
     try {
-      const data = await empleadoService.listarEmpleado();
-      setEmpleados(data);
-      
+      const data = await empresaService.listarEmpresas();
+      setEmpresas(data);
     } catch (error) {
-      console.error("Error al obtener Empleados:", error);
+      console.error("Error al obtener empresas:", error);
     }
   };
-
   useEffect(() => {
-    fetchEmpleados();
+    fetchEmpresas();
   }, []);
 
   const headerColumns = useMemo(() => {
@@ -83,35 +57,30 @@ export default function ListadoEmpleados() {
   }, [visibleColumns]);
 
   const filteredItems = useMemo(() => {
-    let filteredEmployee = [...empleados];
-  
-    // Filtrar empleados cuyo rol sea diferente a "ADMIN"
-    filteredEmployee = filteredEmployee.filter(
-      (employee) => employee.nombre_rol !== "ADMIN"
-    );
-  
+    let filteredEmpresas = [...empresas];
+
     // Filtrado por nombre
     if (hasSearchFilter) {
-      filteredEmployee = filteredEmployee.filter((employee) =>
-        employee.nombre.toLowerCase().includes(filterValue.toLowerCase())
+      filteredEmpresas = filteredEmpresas.filter((empresa) =>
+        empresa.nombre.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
-  
+
+    /*
     // Filtrado por estado (Disponible/Agotado)
     if (statusFilter !== "all" && statusFilter.size > 0) {
       const selectedStatuses = Array.from(statusFilter).map((key) =>
         Number(key)
       ); // Convertir a número
-      filteredEmployee = filteredEmployee.filter((employee) =>
-        selectedStatuses.includes(Number(employee.activo))
+      filteredEmpresas = filteredEmpresas.filter((empresa) =>
+        selectedStatuses.includes(Number(empresa.estado_cantidad))
       );
     }
-  
-    return filteredEmployee;
-  }, [empleados, filterValue, statusFilter]);
+*/
+    return filteredEmpresas;
+  }, [empresas, filterValue, statusFilter]);
 
   const pages = Math.ceil(filteredItems.length / rowsPerPage);
-
   const items = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
@@ -129,38 +98,18 @@ export default function ListadoEmpleados() {
     });
   }, [sortDescriptor, items]);
 
-
-  const renderCell = useCallback((employee, columnKey) => {
-    const cellValue = employee[columnKey];
+  const renderCell = useCallback((empresa, columnKey) => {
+    const cellValue = empresa[columnKey];
 
     switch (columnKey) {
       case "nombre":
-        return <span>{employee.nombre}</span>;
-      case "apellido":
-        return <span>{employee.apellido}</span>;
-      case "dni":
-        return <span>{employee.dni}</span>;
-
-      case "correo_personal":
-        return <span>{employee.correo_personal}</span>;
-      case "correo_empresarial":
-        return <span>{employee.correo_empresarial}</span>;
-      case "telefono":
-        return <span>{employee.telefono}</span>;
-
-      case "activo":
-        return (
-          <Chip
-            className="capitalize"
-            size="sm"
-            variant="flat"
-            color={employee.activo ? "success" : "danger"}
-          >
-            {employee.activo ? "Activo" : "Inactivo"}
-          </Chip>
-        );
-      case "nombre_rol":
-        return <span>{employee.nombre_rol}</span>;
+        return <span>{empresa.nombre}</span>;
+      case "ruc":
+        return <span>{empresa.ruc}</span>;
+      case "website":
+        return <span>{empresa.website}</span>;
+     
+      
       case "acciones":
         return (
           <div className="relative flex justify-center items-center gap-2">
@@ -171,34 +120,9 @@ export default function ListadoEmpleados() {
                 </Button>
               </DropdownTrigger>
               <DropdownMenu>
-                <DropdownItem
-                  onPress={() => openModal(employee.id_empleado, "view")}
-                >
-                  Ver
-                </DropdownItem>
-                {employee.activo !== 0 && (
-                  <DropdownItem
-                  onPress={() => openModal(employee.id_empleado, "user")}
-                >
-                  Gestion Usuario
-                </DropdownItem>
-                )}
-                
-                <DropdownItem
-                  onPress={() => openModal(employee.id_empleado, "state")}
-                >
-                  Cambiar Estado
-                </DropdownItem>
-                {
-                  employee.activo !== 0 &&(
-                    <DropdownItem
-                    onPress={() => openModal(employee.id_empleado, "edit")}
-                  >
-                    Editar
-                  </DropdownItem>
-                  )
-                }
-             
+                <DropdownItem onPress={() => openModal(empresa.id_empresa, "view")}>Ver</DropdownItem>
+                <DropdownItem onPress={() => openModal(empresa.id_empresa, "stock")}>Stock</DropdownItem>
+                <DropdownItem onPress={() => openModal(empresa.id_empresa, "edit")}>Editar</DropdownItem>
               </DropdownMenu>
             </Dropdown>
           </div>
@@ -207,7 +131,6 @@ export default function ListadoEmpleados() {
         return cellValue;
     }
   }, []);
-
   const onNextPage = React.useCallback(() => {
     if (page < pages) {
       setPage(page + 1);
@@ -239,8 +162,8 @@ export default function ListadoEmpleados() {
     setPage(1);
   }, []);
 
-  const openModal = (employeeId, action) => {
-    setSelectedEmployeeId(employeeId);
+  const openModal = (empresaId, action) => {
+    setSelectedEmpresaId(empresaId);
     setModalAction(action);
     onOpen(); // Abre el modal
   };
@@ -259,32 +182,7 @@ export default function ListadoEmpleados() {
             onValueChange={onSearchChange}
           />
           <div className="flex gap-3">
-            <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button
-                  endContent={<ChevronDownIcon className="text-small" />}
-                  variant="flat"
-                >
-                  Estado
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label="Filtrar por estado"
-                closeOnSelect={false}
-                selectedKeys={statusFilter}
-                selectionMode="multiple"
-                onSelectionChange={(keys) =>
-                  setStatusFilter(new Set([...keys]))
-                }
-              >
-                {statusOptions.map((status) => (
-                  <DropdownItem key={status.uid} className="capitalize">
-                    {capitalize(status.name)}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
+           
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
                 <Button
@@ -313,7 +211,7 @@ export default function ListadoEmpleados() {
         </div>
         <div className="flex justify-between items-center">
           <span className="text-default-400 text-small">
-            Total {empleados.length} Empleados
+            Total {empresas.length} Empresas
           </span>
           <label className="flex items-center text-default-400 text-small">
             Filas por página:
@@ -334,7 +232,7 @@ export default function ListadoEmpleados() {
     statusFilter,
     visibleColumns,
     onRowsPerPageChange,
-    empleados.length,
+    empresas.length,
     onSearchChange,
     hasSearchFilter,
   ]);
@@ -372,19 +270,9 @@ export default function ListadoEmpleados() {
       </div>
     );
   }, [page, pages]); // Solo dependencias relevantes
-
-  const actualizarTabla = (empleadoActualizado) => {
-    setEmpleados((prevEmpleados) =>
-      prevEmpleados.map((empleado) =>
-        empleado.id_empleado === empleadoActualizado.id_empleado
-          ? empleadoActualizado
-          : empleado
-      )
-    );
-  };
   return (
     <>
-      <Texto titulo texto={"Listado de Empleados"} />
+      <Texto titulo texto={"Listado de Empresas"} />
       <Table
         aria-label="Example table with custom cells, pagination and sorting"
         bottomContent={bottomContent}
@@ -408,9 +296,9 @@ export default function ListadoEmpleados() {
             </TableColumn>
           )}
         </TableHeader>
-        <TableBody emptyContent={"No hay Empleados"} items={sortedItems}>
+        <TableBody emptyContent={"No hay empresas"} items={sortedItems}>
           {(item) => (
-            <TableRow key={item.id_empleado}>
+            <TableRow key={item.id_empresa}>
               {(columnKey) => (
                 <TableCell>{renderCell(item, columnKey)}</TableCell>
               )}
@@ -418,45 +306,16 @@ export default function ListadoEmpleados() {
           )}
         </TableBody>
       </Table>
-      <Modal
-        size={modalAction === "edit" && "2xl"}
-        hideCloseButton={modalAction === "state" && true}
-        isDismissable={modalAction === "state" ? false : true}
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-      >
-        <ModalContent>
+      <Modal size={modalAction === "edit" && "2xl"} isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent >
           {(onClose) => {
             switch (modalAction) {
               case "view":
-                return (
-                  <InfoEmpleado
-                    onClose={onClose}
-                    employeeId={selectedEmployeeId}
-                  />
-                );
-              case "user":
-                return (
-                  <GestionUsuario
-                    onClose={onClose}
-                    employeeId={selectedEmployeeId}
-                  />
-                );
+                return <InfoEmpresa onClose={onClose} empresaId={selectedEmpresaId} />;
+              case "stock":
+                return <GestionarStock onClose={onClose} empresaId={selectedEmpresaId} />;
               case "edit":
-                return (
-                  <EditarEmpleado
-                    onClose={onClose}
-                    employeeId={selectedEmployeeId}
-                  />
-                );
-              case "state":
-                return (
-                  <GestionActivo
-                    actualizarTabla={actualizarTabla}
-                    onClose={onClose}
-                    employeeId={selectedEmployeeId}
-                  />
-                );
+                return <EditarEmpresa onClose={onClose} empresaId={selectedEmpresaId} />;
               default:
                 return null;
             }
@@ -464,5 +323,5 @@ export default function ListadoEmpleados() {
         </ModalContent>
       </Modal>
     </>
-  );
+  )
 }

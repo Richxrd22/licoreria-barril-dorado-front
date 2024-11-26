@@ -66,12 +66,12 @@ export default function GestionarStock({ onClose, productId }) {
       formikAumentarStock.setValues({
         ...producto,
         cantidad: "",
-        estado_cantidad: producto.estado_cantidad ? 1 : 0,
+        estado_cantidad: producto.estado_cantidad,
       });
       formikReducirStock.setValues({
         ...producto,
         cantidad: "",
-        estado_cantidad: producto.estado_cantidad ? 1 : 0,
+        estado_cantidad: producto.estado_cantidad,
       });
     } catch (error) {
       console.error("Error al obtener datos del producto:", error);
@@ -121,9 +121,8 @@ export default function GestionarStock({ onClose, productId }) {
         markFormAsSubmitted("producto");
         navigate("/admin/producto/confirmacion", {
           state: {
-            mensaje: `Stock del Producto ${values.nombre} ${
-              initialQuantityModifier > 0 ? "aumentado" : "reducido"
-            } con éxito a ${nuevaCantidad}`,
+            mensaje: `Stock del Producto ${values.nombre} ${initialQuantityModifier > 0 ? "aumentado" : "reducido"
+              } con éxito a ${nuevaCantidad}`,
           },
         });
       } catch (error) {

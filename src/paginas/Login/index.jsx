@@ -29,7 +29,6 @@ export default function Login() {
         } else {
           window.location.href = "/empleado";
         }
-
         resetForm();
       } catch (error) {
         console.log("Error al iniciar sesión. Verifica tus credenciales.");
