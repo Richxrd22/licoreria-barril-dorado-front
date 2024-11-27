@@ -1,6 +1,6 @@
 import * as yup from "yup";
 
-export const validacionProveedor = (proveedores) =>
+export const validacionProveedorActualizar = (proveedores, proveedorActual) =>
   yup.object({
     nombre: yup
       .string("Ingrese el nombre del proveedor")
@@ -19,10 +19,11 @@ export const validacionProveedor = (proveedores) =>
       .email("El correo debe ser un correo válido")
       .required("El correo es obligatorio")
       .test("correo-unico", "El correo ya está en uso", (value) => {
-        // Convierte el correo a minúsculas antes de compararlo
         const correoNormalizado = value?.toLowerCase();
         return !proveedores.some(
-          (proveedor) => proveedor.correo.toLowerCase() === correoNormalizado
+          (proveedor) =>
+            proveedor.correo.toLowerCase() === correoNormalizado &&
+            proveedor.id_proveedor !== proveedorActual.id_proveedor
         );
       }),
 
@@ -31,7 +32,11 @@ export const validacionProveedor = (proveedores) =>
       .matches(/^\d{8}$/, "El DNI debe tener exactamente 8 dígitos")
       .required("El DNI es obligatorio")
       .test("dni-unico", "El DNI ya está en uso", (value) => {
-        return !proveedores.some((proveedor) => proveedor.dni === value);
+        return !proveedores.some(
+          (proveedor) =>
+            proveedor.dni === value &&
+            proveedor.id_proveedor !== proveedorActual.id_proveedor
+        );
       }),
 
     telefono: yup
@@ -39,7 +44,11 @@ export const validacionProveedor = (proveedores) =>
       .matches(/^\d{9}$/, "El celular debe tener exactamente 9 dígitos")
       .required("El número de celular es obligatorio")
       .test("celular-unico", "El celular ya está en uso", (value) => {
-        return !proveedores.some((proveedor) => proveedor.telefono === value);
+        return !proveedores.some(
+          (proveedor) =>
+            proveedor.telefono === value &&
+            proveedor.id_proveedor !== proveedorActual.id_proveedor
+        );
       }),
 
     id_empresa: yup

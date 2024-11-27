@@ -53,6 +53,7 @@ function App() {
       "/admin/producto/confirmacion",
       "/admin/empleado/confirmacion",
       "/admin/empresa/confirmacion",
+      "/admin/proveedor/confirmacion",
     ];
     setHideNavbar(!handledRoutes.includes(location.pathname));
   }, [location.pathname]);
@@ -96,9 +97,12 @@ function RoutesAdministrador() {
           <Route index element={<Confirmacion ruta={"/admin/empresa"} />} />
         </Route> 
 
+        <Route path="/admin/proveedor/confirmacion" element={<PrivateRoute formType="proveedor" />}>
+          <Route index element={<Confirmacion ruta={"/admin/proveedor"} />} />
+        </Route> 
         <Route exac path='/admin/empresa' element={<Empresa/>} />
 
-        <Route exac path='/admin/proveedor' element={"<AgregarProveedor />"} />
+        <Route exac path='/admin/proveedor' element={<Proveedor/>} />
 
         <Route exac path='/admin/categoria' element={"<AgregarCategoria />"} />
 

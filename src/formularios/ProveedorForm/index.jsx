@@ -1,41 +1,67 @@
-import { Input, Select, SelectItem } from '@nextui-org/react';
+import { Button, Input, Select, SelectItem } from '@nextui-org/react';
 import { useFormik } from 'formik';
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { validacionProveedor } from '../../validaciones/validacionProveedor';
+import { useNavigate } from 'react-router-dom';
+import { useFormulario } from "../../context/FormularioContext";
+import { proveedorService } from "../../services/ProveedorService";
+import { empresaService } from '../../services/EmpresaService';
+export default function ProveedorForm({ onClose }) {
 
-export default function ProveedorForm() {
+  const [proveedores, setProveedores] = useState([])
+  const [empresas, setEmpresas] = useState([])
+  const { markFormAsSubmitted } = useFormulario();  // Función para actualizar el estado
+  const navigate = useNavigate();
+
+  const fetchProveedores = async () => {
+    try {
+      const data = await proveedorService.listarProveedor();
+      setProveedores(data);
+    } catch (error) {
+      console.error("Error al obtener Proveedores:", error);
+    }
+  };
+  const fetchEmpresas = async () => {
+    try {
+      const data = await empresaService.listarEmpresas();
+      setEmpresas(data);
+    } catch (error) {
+      console.error("Error al obtener Empresas:", error);
+    }
+  };
+  useEffect(() => {
+    fetchProveedores();
+    fetchEmpresas();
+  }, []);
+
   const formik = useFormik({
     initialValues: {
       nombre: "",
       apellido: "",
       correo: "",
       dni: "",
-      celular: "",
+      telefono: "",
       id_empresa: "",
+      activo: 1
     },
-    validationSchema: validacionProveedor,
+    validationSchema: validacionProveedor(proveedores),
     onSubmit: async (values, { setSubmitting, resetForm }) => {
-      /* try {
-              const token = await login(values);
-              localStorage.setItem("token", token);
-      
-              const decodedToken = jwtDecode(token);
-              const idRol = decodedToken.id_rol;
-      
-              // Redirige según el rol del usuario
-              if (idRol === 1) {
-                navigate("/admin");
-              } else {
-                navigate("/user");
-              }
-      
-              resetForm(); // Limpia el formulario tras inicio de sesión exitoso
-            } catch (error) {
-              console.log("Error al iniciar sesión. Verifica tus credenciales.");
-              
-            } finally {
-              setSubmitting(false); // Detiene el estado de "submitting"
-            }*/
+      try {
+        await proveedorService.registrarProveedor(values);
+        resetForm();
+        onClose();
+        markFormAsSubmitted('proveedor');
+        navigate("/admin/proveedor/confirmacion", {
+          state: {
+            mensaje: `Proveedor ${values.nombre} Registrado con Exito`,
+          },
+        });
+
+      } catch (error) {
+        console.error("Error al registrar empresa:", error);
+      } finally {
+        setSubmitting(false);
+      }
     },
   });
   return (
@@ -103,18 +129,18 @@ export default function ProveedorForm() {
           type="text"
           label="Celular"
           placeholder="Introduce el Celular del Proveedor"
-          id="celular"
-          name="celular"
-          value={formik.values.celular}
+          id="telefono"
+          name="telefono"
+          value={formik.values.telefono}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           onError={() =>
-            formik.touched.celular && Boolean(formik.errors.celular)
+            formik.touched.telefono && Boolean(formik.errors.telefono)
           }
-          isInvalid={formik.touched.celular && Boolean(formik.errors.celular)}
-          errorMessage={formik.touched.celular && formik.errors.celular}
+          isInvalid={formik.touched.telefono && Boolean(formik.errors.telefono)}
+          errorMessage={formik.touched.telefono && formik.errors.telefono}
         />
-         <Select
+        <Select
           label="Empresa"
           placeholder="Selecciona una Empresa"
           id="id_empresa"
@@ -141,10 +167,14 @@ export default function ProveedorForm() {
             formik.setFieldTouched("id_empresa", true);
           }}
         >
-          <SelectItem>Johnnie Walker</SelectItem>
-          <SelectItem>Bacardi</SelectItem>
-          <SelectItem>Heineken</SelectItem>
+          {empresas.map((empresa) => {
+            return <SelectItem key={empresa.id_empresa} value={empresa.id_empresa} >{empresa.nombre}</SelectItem>
+          })}
+
         </Select>
+      </div>
+      <div className='pb-5'>
+        <Button type='submit' color='primary' >Registar</Button>
       </div>
     </form>
   );

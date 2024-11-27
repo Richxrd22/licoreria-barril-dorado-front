@@ -20,7 +20,7 @@ export default function GestionActivo({ onClose, productId, actualizarTabla }) {
   const actualizarEstadoProducto = async () => {
     try {
 
-      if (producto.estado_cantidad === true) {
+      if (producto.estado_cantidad ) {
         setEstado("validacion");
         return;
       }

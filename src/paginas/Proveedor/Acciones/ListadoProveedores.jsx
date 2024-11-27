@@ -1,105 +1,57 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Button,
-  Chip,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
-  Input,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  Pagination,
-  Select,
-  SelectItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-  useDisclosure,
-} from "@nextui-org/react";
-import Texto from "../../../componentes/Texto";
-import {
-  columns,
-  statusOptionsActivo,
-  statusOptionsEstadoCantidad,
-} from "./adicionales/datos";
-import { VerticalDotsIcon } from "../../../../public/Icons/VerticalDotsIcon";
-import { SearchIcon } from "../../../../public/Icons/SearchIcon";
-import { ChevronDownIcon } from "../../../../public/Icons/ChevronDownIcon";
-import { capitalize } from "../../../adicionales/utils";
-import { productoService } from "../../../services/ProductoService";
-import EditarProducto from "././EditarProducto";
-import GestionarStock from "././GestionarStock";
-import InfoProducto from "././InfoProducto";
-import GestionActivo from "./GestionActivo";
-import { jwtDecode } from "jwt-decode";
-export default function ListadoProductos() {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+import { Button, Chip, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Modal, ModalContent, Pagination, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { proveedorService } from '../../../services/ProveedorService';
+import { columns, statusOptions } from './adicionales/datos';
+import { VerticalDotsIcon } from '../../../../public/Icons/VerticalDotsIcon';
+import { SearchIcon } from '../../../../public/Icons/SearchIcon';
+import { ChevronDownIcon } from '../../../../public/Icons/ChevronDownIcon';
+import { capitalize } from '../../../adicionales/utils';
+import Texto from '../../../componentes/Texto';
+import InfoProveedor from './InfoProveedor';
+import EditarProveedor from './EditarProveedor';
+import GestionActivo from './GestionActivo';
 
+export default function ListadoProveedores() {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const INITIAL_VISIBLE_COLUMNS = [
     "nombre",
-    "descripcion",
-    "cantidad",
+    "apellido",
+    "dni",
+    "correo",
     "empresa",
-    "estado_cantidad",
     "activo",
     "acciones",
   ];
-  const [selectedProductId, setSelectedProductId] = useState(null);
+  const [selectedProveedorId, setSelectedProveedorId] = useState(null);
   const [modalAction, setModalAction] = useState(null);
-  const [productos, setProductos] = useState([]);
-  const [visibleColumns, setVisibleColumns] = React.useState(
+  const [proveedores, setProveedores] = useState([]);
+  const [visibleColumns, setVisibleColumns] = useState(
     new Set(INITIAL_VISIBLE_COLUMNS)
   );
-  const [statusFilterActivo, setStatusFilterActivo] = useState(new Set(["1"]));
-  const [statusFilterEstadoStock, setStatusFilterEstadoStock] = useState(
-    new Set(["1"])
-  );
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [sortDescriptor, setSortDescriptor] = React.useState({
-    column: "id_producto",
+  const [statusFilter, setStatusFilter] = useState(new Set(["1"]));
+  const [rowsPerPage, setRowsPerPage] = useState(5); // Tamaño de página
+  const [sortDescriptor, setSortDescriptor] = useState({
+    column: "id_proveedor",
     direction: "ascending",
   });
   const [filterValue, setFilterValue] = React.useState("");
   const [page, setPage] = useState(1);
   const hasSearchFilter = Boolean(filterValue);
 
-  const getDecodedToken = () => {
-    const miToken = localStorage.getItem("token");
-    if (miToken) {
-      try {
-        return jwtDecode(miToken); // Decodificamos el token
-      } catch (error) {
-        console.error("Error al decodificar el token:", error);
-        return null;
-      }
-    }
-    return null;
-  };
 
-  const rol = useMemo(() => {
-    const decodedToken = getDecodedToken();
-    return decodedToken?.roles?.includes("ROLE_ADMIN");
-  }, []);
-
-  const fetchProductos = async () => {
+  const fetchProveedores = async () => {
     try {
-      const data = await productoService.listarProducto();
-      setProductos(data);
+      const data = await proveedorService.listarProveedor();
+      setProveedores(data);
       console.log(data);
+      
     } catch (error) {
-      console.error("Error al obtener productos:", error);
+      console.error("Error al obtener Proveedores:", error);
     }
   };
 
   useEffect(() => {
-    fetchProductos();
+    fetchProveedores();
   }, []);
 
   const headerColumns = useMemo(() => {
@@ -111,37 +63,24 @@ export default function ListadoProductos() {
   }, [visibleColumns]);
 
   const filteredItems = useMemo(() => {
-    let filteredProduct = [...productos];
-
-    // Filtro por búsqueda en nombre
-    if (filterValue) {
-      filteredProduct = filteredProduct.filter((product) =>
-        product.nombre.toLowerCase().includes(filterValue.toLowerCase())
+    let filteredProveedores = [...proveedores];
+  
+    if (hasSearchFilter) {
+      filteredProveedores = filteredProveedores.filter((proveedor) =>
+        proveedor.nombre.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
-
-    // Filtro por estado_cantidad (1: Disponible, 0: Agotado)
-    if (statusFilterEstadoStock.size > 0) {
-      const selectedEstadosCantidad = Array.from(statusFilterEstadoStock).map(
-        (key) => parseInt(key, 10)
-      );
-      filteredProduct = filteredProduct.filter((product) =>
-        selectedEstadosCantidad.includes(product.estado_cantidad)
+  
+    if (statusFilter.size > 0) {
+      const selectedStatuses = Array.from(statusFilter).map(Number);
+      filteredProveedores = filteredProveedores.filter((proveedor) =>
+        selectedStatuses.includes(Number(proveedor.activo))
       );
     }
-
-    // Filtro por activo (1: Activo, 0: Inactivo)
-    if (statusFilterActivo.size > 0) {
-      const selectedStatuses = Array.from(statusFilterActivo).map((key) =>
-        parseInt(key, 10)
-      );
-      filteredProduct = filteredProduct.filter((product) =>
-        selectedStatuses.includes(product.activo)
-      );
-    }
-
-    return filteredProduct;
-  }, [productos, filterValue, statusFilterEstadoStock, statusFilterActivo]);
+  
+    return filteredProveedores;
+  }, [proveedores, filterValue, statusFilter]);
+  
 
   const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
@@ -162,44 +101,37 @@ export default function ListadoProductos() {
     });
   }, [sortDescriptor, items]);
 
-  const renderCell = useCallback((product, columnKey) => {
-    const cellValue = product[columnKey];
+
+  const renderCell = useCallback((proveedor, columnKey) => {
+    const cellValue = proveedor[columnKey];
 
     switch (columnKey) {
       case "nombre":
-        return <span>{product.nombre}</span>;
-      case "descripcion":
-        return <span>{product.descripcion}</span>;
-      case "cantidad":
-        return <span>{product.cantidad}</span>;
-      case "estado_cantidad":
-        return (
-          <Chip
-            className="capitalize"
-            size="sm"
-            variant="flat"
-            color={product.estado_cantidad === 1 ? "success" : "danger"}
-          >
-            {product.estado_cantidad === 1 ? "Disponible" : "Agotado"}
-          </Chip>
-        );
-      case "fecha_produccion":
-        return <span>{product.fecha_produccion}</span>;
-      case "fecha_vencimiento":
-        return <span>{product.fecha_vencimiento}</span>;
-      case "categoria":
-        return <span>{product.categoria}</span>;
+        return <span>{proveedor.nombre}</span>;
+      case "apellido":
+        return <span>{proveedor.apellido}</span>;
+      case "dni":
+        return <span>{proveedor.dni}</span>;
+
+      case "correo":
+        return <span>{proveedor.correo}</span>;
+
+      case "telefono":
+        return <span>{proveedor.telefono}</span>;
+
       case "activo":
         return (
           <Chip
             className="capitalize"
             size="sm"
             variant="flat"
-            color={product.activo === 1 ? "success" : "danger"}
+            color={proveedor.activo ? "success" : "danger"}
           >
-            {product.activo === 1 ? "Activo" : "Inactivo"}
+            {proveedor.activo ? "Activo" : "Inactivo"}
           </Chip>
         );
+      case "empresa":
+        return <span>{proveedor.empresa}</span>;
       case "acciones":
         return (
           <div className="relative flex justify-center items-center gap-2">
@@ -211,32 +143,33 @@ export default function ListadoProductos() {
               </DropdownTrigger>
               <DropdownMenu>
                 <DropdownItem
-                  onPress={() => openModal(product.id_producto, "view")}
+                  onPress={() => openModal(proveedor.id_proveedor, "view")}
                 >
                   Ver
                 </DropdownItem>
-                {product.activo !== 0 && (
+                {proveedor.activo !== 0 && (
                   <DropdownItem
-                    onPress={() => openModal(product.id_producto, "stock")}
+                    onPress={() => openModal(proveedor.id_proveedor, "user")}
                   >
-                    Gestion Stock
-                  </DropdownItem>
-                )}
-                {rol && (
-                  <DropdownItem
-                    onPress={() => openModal(product.id_producto, "state")}
-                  >
-                    Cambiar Estado
+                    Gestion Usuario
                   </DropdownItem>
                 )}
 
-                {product.activo !== 0 && (
-                  <DropdownItem
-                    onPress={() => openModal(product.id_producto, "edit")}
-                  >
-                    Editar
-                  </DropdownItem>
-                )}
+                <DropdownItem
+                  onPress={() => openModal(proveedor.id_proveedor, "state")}
+                >
+                  Cambiar Estado
+                </DropdownItem>
+                {
+                  proveedor.activo !== 0 && (
+                    <DropdownItem
+                      onPress={() => openModal(proveedor.id_proveedor, "edit")}
+                    >
+                      Editar
+                    </DropdownItem>
+                  )
+                }
+
               </DropdownMenu>
             </Dropdown>
           </div>
@@ -246,24 +179,24 @@ export default function ListadoProductos() {
     }
   }, []);
 
-  const onNextPage = React.useCallback(() => {
+  const onNextPage = useCallback(() => {
     if (page < pages) {
       setPage(page + 1);
     }
   }, [page, pages]);
 
-  const onPreviousPage = React.useCallback(() => {
+  const onPreviousPage = useCallback(() => {
     if (page > 1) {
       setPage(page - 1);
     }
   }, [page]);
 
-  const onRowsPerPageChange = React.useCallback((e) => {
+  const onRowsPerPageChange = useCallback((e) => {
     setRowsPerPage(Number(e.target.value));
     setPage(1);
   }, []);
 
-  const onSearchChange = React.useCallback((value) => {
+  const onSearchChange = useCallback((value) => {
     if (value) {
       setFilterValue(value);
       setPage(1);
@@ -272,29 +205,18 @@ export default function ListadoProductos() {
     }
   }, []);
 
-  const onClear = React.useCallback(() => {
+  const onClear = useCallback(() => {
     setFilterValue("");
     setPage(1);
   }, []);
 
-  const openModal = (productId, action) => {
-    setSelectedProductId(productId);
+  const openModal = (proveedorId, action) => {
+    setSelectedProveedorId(proveedorId);
     setModalAction(action);
-    onOpen();
-  };
-  const actualizarTabla = (productoActualizado) => {
-    setProductos((prevProductos) => {
-      // Asegúrate de que el producto actualizado se está agregando correctamente.
-      return prevProductos.map((producto) =>
-        producto.id_producto === productoActualizado.id_producto
-          ? { ...producto, ...productoActualizado } // Usar spread operator para actualizar las propiedades
-          : producto
-      );
-    });
-    console.log(productoActualizado);
+    onOpen(); 
   };
 
-  const topContent = React.useMemo(() => {
+  const topContent = useMemo(() => {
     return (
       <div className="flex flex-col gap-4">
         <div className="flex justify-between gap-3 items-end">
@@ -314,35 +236,6 @@ export default function ListadoProductos() {
                   endContent={<ChevronDownIcon className="text-small" />}
                   variant="flat"
                 >
-                  Estado Cantidad
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label="Filtrar por estado cantidad"
-                closeOnSelect={false}
-                selectedKeys={statusFilterEstadoStock}
-                selectionMode="multiple"
-                onSelectionChange={(keys) =>
-                  setStatusFilterEstadoStock(new Set([...keys]))
-                }
-              >
-                {statusOptionsEstadoCantidad.map((status) => (
-                  <DropdownItem
-                    key={status.uid.toString()}
-                    className="capitalize"
-                  >
-                    {status.name}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-            <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button
-                  endContent={<ChevronDownIcon className="text-small" />}
-                  variant="flat"
-                >
                   Estado
                 </Button>
               </DropdownTrigger>
@@ -350,23 +243,19 @@ export default function ListadoProductos() {
                 disallowEmptySelection
                 aria-label="Filtrar por estado"
                 closeOnSelect={false}
-                selectedKeys={statusFilterActivo}
+                selectedKeys={statusFilter}
                 selectionMode="multiple"
                 onSelectionChange={(keys) =>
-                  setStatusFilterActivo(new Set([...keys]))
+                  setStatusFilter(new Set([...keys]))
                 }
               >
-                {statusOptionsActivo.map((status) => (
-                  <DropdownItem
-                    key={status.uid.toString()}
-                    className="capitalize"
-                  >
-                    {status.name}
+                {statusOptions.map((status) => (
+                  <DropdownItem key={status.uid} className="capitalize">
+                    {capitalize(status.name)}
                   </DropdownItem>
                 ))}
               </DropdownMenu>
             </Dropdown>
-
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
                 <Button
@@ -395,7 +284,7 @@ export default function ListadoProductos() {
         </div>
         <div className="flex justify-between items-center">
           <span className="text-default-400 text-small">
-            Total {productos.length} Productos
+            Total {proveedores.length} Proveedores
           </span>
           <label className="flex items-center text-default-400 text-small">
             Filas por página:
@@ -413,11 +302,10 @@ export default function ListadoProductos() {
     );
   }, [
     filterValue,
-    statusFilterEstadoStock,
-    statusFilterActivo,
+    statusFilter,
     visibleColumns,
     onRowsPerPageChange,
-    productos.length,
+    proveedores.length,
     onSearchChange,
     hasSearchFilter,
   ]);
@@ -436,7 +324,7 @@ export default function ListadoProductos() {
         />
         <div className="hidden sm:flex w-[30%] justify-end gap-2">
           <Button
-            isDisabled={page === 1}
+            isDisabled={page === 1} // Cambié `pages === 1` a `page === 1`
             size="sm"
             variant="flat"
             onPress={onPreviousPage}
@@ -444,7 +332,7 @@ export default function ListadoProductos() {
             Anterior
           </Button>
           <Button
-            isDisabled={page === pages}
+            isDisabled={page === pages} // Cambié `pages === 1` a `page === pages`
             size="sm"
             variant="flat"
             onPress={onNextPage}
@@ -454,11 +342,20 @@ export default function ListadoProductos() {
         </div>
       </div>
     );
-  }, [page, pages]);
+  }, [page, pages]); // Solo dependencias relevantes
 
+  const actualizarTabla = (proveedorActualizado) => {
+    setProveedores((prevProveedores) =>
+      prevProveedores.map((proveedor) =>
+        proveedor.id_proveedor === proveedorActualizado.id_proveedor
+          ? proveedorActualizado
+          : proveedor
+      )
+    );
+  };
   return (
     <>
-      <Texto titulo texto={"Listado de Productos"} />
+      <Texto titulo texto={"Listado de Proveedores"} />
       <Table
         aria-label="Example table with custom cells, pagination and sorting"
         bottomContent={bottomContent}
@@ -482,9 +379,9 @@ export default function ListadoProductos() {
             </TableColumn>
           )}
         </TableHeader>
-        <TableBody emptyContent={"No hay productos"} items={sortedItems}>
+        <TableBody emptyContent={"No hay Proveedores"} items={sortedItems}>
           {(item) => (
-            <TableRow key={item.id_producto}>
+            <TableRow key={item.id_proveedor}>
               {(columnKey) => (
                 <TableCell>{renderCell(item, columnKey)}</TableCell>
               )}
@@ -492,7 +389,6 @@ export default function ListadoProductos() {
           )}
         </TableBody>
       </Table>
-
       <Modal
         size={modalAction === "edit" && "2xl"}
         hideCloseButton={modalAction === "state" && true}
@@ -505,23 +401,23 @@ export default function ListadoProductos() {
             switch (modalAction) {
               case "view":
                 return (
-                  <InfoProducto
+                  <InfoProveedor
                     onClose={onClose}
-                    productId={selectedProductId}
+                    proveedorId={selectedProveedorId}
                   />
                 );
-              case "stock":
+              case "user":
                 return (
-                  <GestionarStock
+                  <GestionUsuario
                     onClose={onClose}
-                    productId={selectedProductId}
+                    proveedorId={selectedProveedorId}
                   />
                 );
               case "edit":
                 return (
-                  <EditarProducto
+                  <EditarProveedor
                     onClose={onClose}
-                    productId={selectedProductId}
+                    proveedorId={selectedProveedorId}
                   />
                 );
               case "state":
@@ -529,7 +425,7 @@ export default function ListadoProductos() {
                   <GestionActivo
                     actualizarTabla={actualizarTabla}
                     onClose={onClose}
-                    productId={selectedProductId}
+                    proveedorId={selectedProveedorId}
                   />
                 );
               default:
@@ -539,5 +435,5 @@ export default function ListadoProductos() {
         </ModalContent>
       </Modal>
     </>
-  );
+  )
 }
