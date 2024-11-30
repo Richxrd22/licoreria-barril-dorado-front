@@ -19,7 +19,7 @@ export default function Confirmacion({ruta}) {
         className="flex items-center justify-center min-h-screen"
         style={{ minHeight: "calc(100vh - 90px)" }}
       >
-        <Card className="max-w-[500px]" shadow="lg">
+        <Card className="max-w-[600px] min-w-[500px] " shadow="lg">
           <div className="p-5 flex flex-col gap-5">
             <h2 className="text-center text-xl">Licoreria Barril Dorado</h2>
             <div className="flex  flex-col items-center gap-3">

@@ -12,7 +12,6 @@ import EditarEmpresa from './EditarEmpresa';
 
 export default function ListadoEmpresa() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  //hook para obtener empresas con stock
   const INITIAL_VISIBLE_COLUMNS = [
     "id_empresa",
     "nombre",
@@ -59,7 +58,6 @@ export default function ListadoEmpresa() {
   const filteredItems = useMemo(() => {
     let filteredEmpresas = [...empresas];
 
-    // Filtrado por nombre
     if (hasSearchFilter) {
       filteredEmpresas = filteredEmpresas.filter((empresa) =>
         empresa.nombre.toLowerCase().includes(filterValue.toLowerCase())
@@ -108,8 +106,8 @@ export default function ListadoEmpresa() {
         return <span>{empresa.ruc}</span>;
       case "website":
         return <span>{empresa.website}</span>;
-     
-      
+
+
       case "acciones":
         return (
           <div className="relative flex justify-center items-center gap-2">
@@ -121,7 +119,6 @@ export default function ListadoEmpresa() {
               </DropdownTrigger>
               <DropdownMenu>
                 <DropdownItem onPress={() => openModal(empresa.id_empresa, "view")}>Ver</DropdownItem>
-                <DropdownItem onPress={() => openModal(empresa.id_empresa, "stock")}>Stock</DropdownItem>
                 <DropdownItem onPress={() => openModal(empresa.id_empresa, "edit")}>Editar</DropdownItem>
               </DropdownMenu>
             </Dropdown>
@@ -165,7 +162,7 @@ export default function ListadoEmpresa() {
   const openModal = (empresaId, action) => {
     setSelectedEmpresaId(empresaId);
     setModalAction(action);
-    onOpen(); // Abre el modal
+    onOpen(); 
   };
 
   const topContent = useMemo(() => {
@@ -182,7 +179,7 @@ export default function ListadoEmpresa() {
             onValueChange={onSearchChange}
           />
           <div className="flex gap-3">
-           
+
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
                 <Button
@@ -251,7 +248,7 @@ export default function ListadoEmpresa() {
         />
         <div className="hidden sm:flex w-[30%] justify-end gap-2">
           <Button
-            isDisabled={page === 1} // Cambié `pages === 1` a `page === 1`
+            isDisabled={page === 1} 
             size="sm"
             variant="flat"
             onPress={onPreviousPage}
@@ -259,7 +256,7 @@ export default function ListadoEmpresa() {
             Anterior
           </Button>
           <Button
-            isDisabled={page === pages} // Cambié `pages === 1` a `page === pages`
+            isDisabled={page === pages} 
             size="sm"
             variant="flat"
             onPress={onNextPage}
@@ -269,7 +266,7 @@ export default function ListadoEmpresa() {
         </div>
       </div>
     );
-  }, [page, pages]); // Solo dependencias relevantes
+  }, [page, pages]); 
   return (
     <>
       <Texto titulo texto={"Listado de Empresas"} />
@@ -312,8 +309,7 @@ export default function ListadoEmpresa() {
             switch (modalAction) {
               case "view":
                 return <InfoEmpresa onClose={onClose} empresaId={selectedEmpresaId} />;
-              case "stock":
-                return <GestionarStock onClose={onClose} empresaId={selectedEmpresaId} />;
+
               case "edit":
                 return <EditarEmpresa onClose={onClose} empresaId={selectedEmpresaId} />;
               default:

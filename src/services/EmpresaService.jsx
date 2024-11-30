@@ -19,6 +19,38 @@ async function listarEmpresas() {
   }
 }
 
+async function listarEmpresasNoUsadas(idProveedorActual = null) {
+  const token = localStorage.getItem("token");
+  
+  // Construir la URL de la API
+  let url = "http://localhost:7575/empresa/listar/no-ocupados";
+  
+  // Si se pasa el idProveedorActual, agregarlo como parámetro de consulta
+  if (idProveedorActual) {
+    url += `?idProveedorActual=${idProveedorActual}`;
+  }
+  
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+
+    const empresas = await response.json();
+    return empresas;
+  } catch (error) {
+    console.error("Error al listar empresas:", error);
+    throw new Error("Error al conectar con el servidor");
+  }
+}
+
 async function registrarEmpresa(empresa) {
   const token = localStorage.getItem("token");
   try {
@@ -93,6 +125,6 @@ export const empresaService = {
   listarEmpresas,
   registrarEmpresa,
   obtenerEmpresaId,
-  editarEmpresa
-
+  editarEmpresa,
+  listarEmpresasNoUsadas
 };

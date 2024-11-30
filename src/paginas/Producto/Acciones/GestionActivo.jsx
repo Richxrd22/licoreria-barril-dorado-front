@@ -1,31 +1,22 @@
-import { Button, ModalBody, ModalHeader } from "@nextui-org/react";
-import React, { useEffect, useState } from "react";
+import { Button, ModalBody } from "@nextui-org/react";
+import React, { useState } from "react";
 import { CheckCircleIcon } from "../../../../public/Icons/CheckCircleIcon";
 import { CloseCircleIcon } from "../../../../public/Icons/CloseCircleIcon";
 import { productoService } from "../../../services/ProductoService";
 import Progress from "../../../componentes/Progress";
 import { WarningAmberRounded } from "@mui/icons-material";
+import { useProductos } from "../../../hook/useProductos";
 export default function GestionActivo({ onClose, productId, actualizarTabla }) {
-  const [producto, setProducto] = useState(null);
+  const { producto, isLoading } = useProductos(productId);
   const [estado, setEstado] = useState(null);
   const [cargando, setCargando] = useState(false);
-  const fetchProducto = async () => {
-    try {
-      const data = await productoService.obtenerproductoId(productId);
-      setProducto(data);
-    } catch (error) {
-      console.error("Error al obtener los detalles del producto:", error);
-    }
-  };
+
   const actualizarEstadoProducto = async () => {
     try {
-
-      if (producto.estado_cantidad ) {
+      if (producto.estado_cantidad) {
         setEstado("validacion");
         return;
       }
-
-
       const nuevoActivo = producto.activo ? 0 : 1;
 
       const productoActualizado = {
@@ -34,7 +25,7 @@ export default function GestionActivo({ onClose, productId, actualizarTabla }) {
         descripcion: producto.descripcion,
         cantidad: producto.cantidad,
         precio: producto.precio,
-        estado_cantidad: producto.estado_cantidad ,
+        estado_cantidad: producto.estado_cantidad,
         fecha_produccion: producto.fecha_produccion,
         fecha_vencimiento: producto.fecha_vencimiento,
         id_categoria: parseInt(producto.id_categoria),
@@ -47,8 +38,6 @@ export default function GestionActivo({ onClose, productId, actualizarTabla }) {
 
       await productoService.editarProducto(productoActualizado);
 
-
-      setProducto(productoActualizado);
       setEstado("success");
     } catch (error) {
       console.error("Error al actualizar el estado del producto:", error);
@@ -58,15 +47,7 @@ export default function GestionActivo({ onClose, productId, actualizarTabla }) {
     }
   };
 
-
-
-  useEffect(() => {
-    if (productId) {
-      fetchProducto();
-    }
-  }, [productId]);
-
-  if (!producto) return <Progress />;
+  if (isLoading) return <Progress />;
   return (
     <>
       {estado === "success" ? (
@@ -98,16 +79,16 @@ export default function GestionActivo({ onClose, productId, actualizarTabla }) {
         <ModalBody>
           <h2 className="text-center text-xl text-yellow-600">Advertencia</h2>
           <div className="flex flex-col items-center gap-3">
-            <WarningAmberRounded className="text-yellow-600" style={{ fontSize: '60px' }} />
+            <WarningAmberRounded
+              className="text-yellow-600"
+              style={{ fontSize: "60px" }}
+            />
             <p className="text-center">
               No se puede desactivar este producto porque aún tiene stock
               disponible.
             </p>
           </div>
-          <Button
-            className="bg-yellow-600 text-white"
-            onPress={onClose}
-          >
+          <Button className="bg-yellow-600 text-white" onPress={onClose}>
             Entendido
           </Button>
         </ModalBody>
@@ -132,6 +113,5 @@ export default function GestionActivo({ onClose, productId, actualizarTabla }) {
         </ModalBody>
       )}
     </>
-
   );
 }

@@ -32,7 +32,6 @@ export default function GestionActivo({ onClose, employeeId, actualizarTabla }) 
         activo: nuevoActivo,
       };
 
-      // Llamamos al servicio para actualizar el empleado con el nuevo estado
       setCargando(true);
       actualizarTabla(empleadoActualizado);
 

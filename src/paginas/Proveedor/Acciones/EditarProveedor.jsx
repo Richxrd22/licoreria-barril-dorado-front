@@ -8,30 +8,29 @@ import { Button, Input, ModalBody, ModalHeader, Select, SelectItem } from "@next
 import { validacionProveedorActualizar } from "../../../validaciones/validacionProveedorActualizar";
 import Progress from "../../../componentes/Progress";
 import { empresaService } from "../../../services/EmpresaService";
+import { useDecodedToken } from "../../../hook/useDecodedToken";
 
 export default function EditarProveedor({ onClose, proveedorId }) {
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
   const [proveedoresExistentes, setProveedoresExistentes] = useState([]);
   const [empresas, setEmpresas] = useState([])
   const { markFormAsSubmitted } = useFormulario(); // Función para actualizar el estado
+  const { decodedToken, baseRoute } = useDecodedToken();
   const navigate = useNavigate();
 
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        // Cargar datos del proveedor
         const proveedorBuscado = await proveedorService.obtenerProveedorId(
           proveedorId
         );
         setProveedorSeleccionado(proveedorBuscado);
 
-        // Cargar proveedors existentes (si es necesario)
         const data = await proveedorService.listarProveedor();
         setProveedoresExistentes(data);
 
-        const listadoEmpresas = await empresaService.listarEmpresas();
+        const listadoEmpresas = await empresaService.listarEmpresasNoUsadas(proveedorId);
         setEmpresas(listadoEmpresas);
-        // Usar `resetForm` después de obtener los datos
         formik.resetForm({
           values: {
             id_proveedor: proveedorId,
@@ -52,7 +51,7 @@ export default function EditarProveedor({ onClose, proveedorId }) {
     if (proveedorId) {
       cargarDatos();
     }
-  }, [proveedorId]); // Solo se ejecuta cuando `employeeId` cambia
+  }, [proveedorId]); 
 
   const formik = useFormik({
     initialValues: {
@@ -77,7 +76,7 @@ export default function EditarProveedor({ onClose, proveedorId }) {
         resetForm();
         onClose();
         markFormAsSubmitted("proveedor");
-        navigate("/admin/proveedor/confirmacion", {
+        navigate(`${baseRoute}/proveedor/confirmacion`, {
           state: {
             mensaje: `Los Datos del Proveedor ${values.nombre} se actualizo con éxito`,
           },
@@ -85,7 +84,7 @@ export default function EditarProveedor({ onClose, proveedorId }) {
       } catch (error) {
         console.error("Error al Actualizar el Proveedor:", error);
       } finally {
-        setSubmitting(false); // Esto indicará que el formulario terminó de enviarse
+        setSubmitting(false); 
       }
     },
   });

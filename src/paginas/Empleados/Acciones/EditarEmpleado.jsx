@@ -16,15 +16,12 @@ export default function EditarEmpleado({ onClose, employeeId }) {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        // Cargar datos del empleado
         const empleadoBuscado = await empleadoService.obtenerEmpleadoId(employeeId);
         setEmpleadoSeleccionado(empleadoBuscado);
 
-        // Cargar empleados existentes (si es necesario)
         const data = await empleadoService.listarEmpleado();
         setEmpleadosExistentes(data);
 
-        // Usar `resetForm` después de obtener los datos
         formik.resetForm({
           values: {
             id_empleado: employeeId,
@@ -35,7 +32,7 @@ export default function EditarEmpleado({ onClose, employeeId }) {
             correo_personal: empleadoBuscado.correo_personal,
             telefono: empleadoBuscado.telefono,
             direccion: empleadoBuscado.direccion,
-            activo: empleadoBuscado.activo === true ? 1 : 0,
+            activo: empleadoBuscado.activo ,
             id_rol:empleadoBuscado.id_rol
           },
         });
@@ -47,7 +44,7 @@ export default function EditarEmpleado({ onClose, employeeId }) {
     if (employeeId) {
       cargarDatos();
     }
-  }, [employeeId]); // Solo se ejecuta cuando `employeeId` cambia
+  }, [employeeId]); 
 
   const formik = useFormik({
     initialValues: {
@@ -80,8 +77,8 @@ export default function EditarEmpleado({ onClose, employeeId }) {
       } catch (error) {
         console.error("Error al Actualizar el Empleado:", error);
       } finally {
-        setSubmitting(false); // Esto indicará que el formulario terminó de enviarse
-      }
+        setSubmitting(false);
+            }
     },
   });
 

@@ -85,19 +85,16 @@ export default function ListadoEmpleados() {
   const filteredItems = useMemo(() => {
     let filteredEmployee = [...empleados];
   
-    // Filtrar empleados cuyo rol sea diferente a "ADMIN"
     filteredEmployee = filteredEmployee.filter(
       (employee) => employee.nombre_rol !== "ADMIN"
     );
   
-    // Filtrado por nombre
     if (hasSearchFilter) {
       filteredEmployee = filteredEmployee.filter((employee) =>
         employee.nombre.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
   
-    // Filtrado por estado (Disponible/Agotado)
     if (statusFilter !== "all" && statusFilter.size > 0) {
       const selectedStatuses = Array.from(statusFilter).map((key) =>
         Number(key)
@@ -242,7 +239,7 @@ export default function ListadoEmpleados() {
   const openModal = (employeeId, action) => {
     setSelectedEmployeeId(employeeId);
     setModalAction(action);
-    onOpen(); // Abre el modal
+    onOpen(); 
   };
 
   const topContent = useMemo(() => {
@@ -353,7 +350,7 @@ export default function ListadoEmpleados() {
         />
         <div className="hidden sm:flex w-[30%] justify-end gap-2">
           <Button
-            isDisabled={page === 1} // Cambié `pages === 1` a `page === 1`
+            isDisabled={page === 1} 
             size="sm"
             variant="flat"
             onPress={onPreviousPage}
@@ -361,7 +358,7 @@ export default function ListadoEmpleados() {
             Anterior
           </Button>
           <Button
-            isDisabled={page === pages} // Cambié `pages === 1` a `page === pages`
+            isDisabled={page === pages} 
             size="sm"
             variant="flat"
             onPress={onNextPage}
@@ -371,7 +368,7 @@ export default function ListadoEmpleados() {
         </div>
       </div>
     );
-  }, [page, pages]); // Solo dependencias relevantes
+  }, [page, pages]); 
 
   const actualizarTabla = (empleadoActualizado) => {
     setEmpleados((prevEmpleados) =>

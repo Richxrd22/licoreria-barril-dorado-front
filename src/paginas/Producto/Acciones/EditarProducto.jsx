@@ -9,21 +9,22 @@ import { productoService } from "../../../services/ProductoService";
 import Progress from "../../../componentes/Progress";
 import { validacionProducto } from "../../../validaciones/validacionProducto";
 import { validacionProductoActualizar } from "../../../validaciones/validacionProductoActualizar";
+import { useDecodedToken } from "../../../hook/useDecodedToken";
 
 export default function EditarProducto({ onClose, productId }) {
   const [categorias, setCategorias] = useState([]);
   const [proveedores, setProveedores] = useState([]);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null)
   const [productos,setProductos]=useState([])
-  const { markFormAsSubmitted } = useFormulario(); // Función para actualizar el estado
+  const { markFormAsSubmitted } = useFormulario();
   const navigate = useNavigate();
+  const { baseRoute } = useDecodedToken();
   const fetchProducto = async (productId) => {
     try {
       const producto = await productoService.obtenerproductoId(productId);
       const productos = await productoService.listarProducto();
       setProductoSeleccionado(producto)
       setProductos(productos)
-      // Seteamos los valores iniciales del formulario
       formik.resetForm({
         values: {
           id_producto:productId,
@@ -68,7 +69,7 @@ export default function EditarProducto({ onClose, productId }) {
         resetForm();
         onClose();
         markFormAsSubmitted("producto");
-        navigate("/admin/producto/confirmacion", {
+        navigate(`${baseRoute}/producto/confirmacion`, {
           state: {
             mensaje: `Producto ${values.nombre} actualizado con éxito`,
           },
@@ -76,7 +77,7 @@ export default function EditarProducto({ onClose, productId }) {
       } catch (error) {
         console.error("Error al Actualizar el producto:", error);
       } finally {
-        setSubmitting(false); // Esto indicará que el formulario terminó de enviarse
+        setSubmitting(false); 
       }
     },
   });

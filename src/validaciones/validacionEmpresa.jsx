@@ -7,7 +7,6 @@ const validacionEmpresa = (empresas) => yup.object({
     .min(2, "El nombre debe tener al menos 2 caracteres")
     .max(50, "El nombre no puede tener más de 50 caracteres")
     .test("nombre-unico", "El nombre ya está en uso", (value) => {
-      // Verifica que el nombre no esté duplicado entre las empresas
       return !empresas.some((emp) => emp.nombre === value);
     }),
 
@@ -16,7 +15,6 @@ const validacionEmpresa = (empresas) => yup.object({
     .required("El RUC es obligatorio")
     .matches(/^\d{11}$/, "El RUC debe tener 11 dígitos")
     .test("ruc-unico", "El RUC ya está en uso", (value) => {
-      // Verifica que el RUC no esté duplicado
       return !empresas.some((emp) => emp.ruc === value);
     }),
 
@@ -28,7 +26,6 @@ const validacionEmpresa = (empresas) => yup.object({
       "El sitio web debe estar en el formato www.example.com"
     )
     .test("website-unico", "El website ya está en uso", (value) => {
-      // Verifica que el website no esté duplicado entre las empresas
       return !empresas.some((emp) => emp.website === value);
     }),
 });

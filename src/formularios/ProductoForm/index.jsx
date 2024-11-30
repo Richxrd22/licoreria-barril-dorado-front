@@ -20,6 +20,7 @@ import { proveedorService } from "../../services/ProveedorService";
 import { productoService } from "../../services/ProductoService";
 import { useFormulario } from "../../context/FormularioContext";
 import { useNavigate } from "react-router-dom";
+import { useDecodedToken } from "../../hook/useDecodedToken";
 export default function ProductoForm({ onClose }) {
 
   const [categorias, setCategorias] = useState([]);
@@ -27,6 +28,9 @@ export default function ProductoForm({ onClose }) {
   const [productos,setProductos]=useState([]);
   const { markFormAsSubmitted } = useFormulario();  // Función para actualizar el estado
   const navigate = useNavigate();
+  const {  baseRoute } = useDecodedToken();
+
+
   const formik = useFormik({
     initialValues: {
       nombre: "",
@@ -63,7 +67,7 @@ export default function ProductoForm({ onClose }) {
         markFormAsSubmitted('producto');
 
         // Redirigimos a la ruta de confirmación del producto
-        navigate("/admin/producto/confirmacion", {
+        navigate(`${baseRoute}/producto/confirmacion`, {
           state: {
             mensaje: `Producto ${values.nombre} Registrado con Exito`,
           },
@@ -102,8 +106,10 @@ export default function ProductoForm({ onClose }) {
   const fetchProveedores = async () => {
     try {
       const data = await proveedorService.listarProveedor();
-      setProveedores(data);
-      console.log(data);
+      // Filtrar proveedores con estado activo en 1
+      const proveedoresActivos = data.filter(proveedor => proveedor.activo === 1);
+      setProveedores(proveedoresActivos);
+      console.log(proveedoresActivos);
     } catch (error) {
       console.error("Error al obtener proveedores:", error);
       alert("No se pudo cargar la lista de proveedores");

@@ -33,15 +33,15 @@ import { VerticalDotsIcon } from "../../../../public/Icons/VerticalDotsIcon";
 import { SearchIcon } from "../../../../public/Icons/SearchIcon";
 import { ChevronDownIcon } from "../../../../public/Icons/ChevronDownIcon";
 import { capitalize } from "../../../adicionales/utils";
-import { productoService } from "../../../services/ProductoService";
 import EditarProducto from "././EditarProducto";
 import GestionarStock from "././GestionarStock";
 import InfoProducto from "././InfoProducto";
 import GestionActivo from "./GestionActivo";
-import { jwtDecode } from "jwt-decode";
+import { useProductos } from "../../../hook/useProductos";
+import { useDecodedToken } from "../../../hook/useDecodedToken";
 export default function ListadoProductos() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
+  const { rol } = useDecodedToken();
   const INITIAL_VISIBLE_COLUMNS = [
     "nombre",
     "descripcion",
@@ -51,9 +51,10 @@ export default function ListadoProductos() {
     "activo",
     "acciones",
   ];
+  const { productos, setProductos } =
+    useProductos();
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [modalAction, setModalAction] = useState(null);
-  const [productos, setProductos] = useState([]);
   const [visibleColumns, setVisibleColumns] = React.useState(
     new Set(INITIAL_VISIBLE_COLUMNS)
   );
@@ -70,38 +71,6 @@ export default function ListadoProductos() {
   const [page, setPage] = useState(1);
   const hasSearchFilter = Boolean(filterValue);
 
-  const getDecodedToken = () => {
-    const miToken = localStorage.getItem("token");
-    if (miToken) {
-      try {
-        return jwtDecode(miToken); // Decodificamos el token
-      } catch (error) {
-        console.error("Error al decodificar el token:", error);
-        return null;
-      }
-    }
-    return null;
-  };
-
-  const rol = useMemo(() => {
-    const decodedToken = getDecodedToken();
-    return decodedToken?.roles?.includes("ROLE_ADMIN");
-  }, []);
-
-  const fetchProductos = async () => {
-    try {
-      const data = await productoService.listarProducto();
-      setProductos(data);
-      console.log(data);
-    } catch (error) {
-      console.error("Error al obtener productos:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchProductos();
-  }, []);
-
   const headerColumns = useMemo(() => {
     if (visibleColumns === "all") return columns;
 
@@ -113,14 +82,12 @@ export default function ListadoProductos() {
   const filteredItems = useMemo(() => {
     let filteredProduct = [...productos];
 
-    // Filtro por búsqueda en nombre
     if (filterValue) {
       filteredProduct = filteredProduct.filter((product) =>
         product.nombre.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
 
-    // Filtro por estado_cantidad (1: Disponible, 0: Agotado)
     if (statusFilterEstadoStock.size > 0) {
       const selectedEstadosCantidad = Array.from(statusFilterEstadoStock).map(
         (key) => parseInt(key, 10)
@@ -130,7 +97,6 @@ export default function ListadoProductos() {
       );
     }
 
-    // Filtro por activo (1: Activo, 0: Inactivo)
     if (statusFilterActivo.size > 0) {
       const selectedStatuses = Array.from(statusFilterActivo).map((key) =>
         parseInt(key, 10)
@@ -284,16 +250,13 @@ export default function ListadoProductos() {
   };
   const actualizarTabla = (productoActualizado) => {
     setProductos((prevProductos) => {
-      // Asegúrate de que el producto actualizado se está agregando correctamente.
       return prevProductos.map((producto) =>
         producto.id_producto === productoActualizado.id_producto
-          ? { ...producto, ...productoActualizado } // Usar spread operator para actualizar las propiedades
+          ? { ...producto, ...productoActualizado } 
           : producto
       );
     });
-    console.log(productoActualizado);
   };
-
   const topContent = React.useMemo(() => {
     return (
       <div className="flex flex-col gap-4">

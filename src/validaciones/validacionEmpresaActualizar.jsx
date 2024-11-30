@@ -1,13 +1,11 @@
 import * as yup from "yup";
 
-// Función para validar los datos de actualización de una empresa
 export const validacionEmpresaActualizar = (empresas, empresaActualizar) =>
   yup.object({
     nombre: yup
       .string("Ingrese el nombre de la empresa")
       .required("El nombre es obligatorio")
       .test("nombre-unico", "El nombre ya está en uso", (value) => {
-        // Normaliza a minúsculas antes de comparar
         const valorNormalizado = value?.toLowerCase();
         return !empresas.some(
           (emp) =>
@@ -21,7 +19,6 @@ export const validacionEmpresaActualizar = (empresas, empresaActualizar) =>
       .required("El RUC es obligatorio")
       .matches(/^\d{11}$/, "El RUC debe tener exactamente 11 dígitos")
       .test("ruc-unico", "El RUC ya está en uso", (value) => {
-        // Normaliza a minúsculas antes de comparar
         const valorNormalizado = value?.toLowerCase();
         return !empresas.some(
           (emp) =>
@@ -38,7 +35,6 @@ export const validacionEmpresaActualizar = (empresas, empresaActualizar) =>
         "El sitio web debe estar en el formato www.example.com"
       )
       .test("website-unico", "El sitio web ya está en uso", (value) => {
-        // Normaliza a minúsculas antes de comparar
         const valorNormalizado = value?.toLowerCase();
         return !empresas.some(
           (emp) =>

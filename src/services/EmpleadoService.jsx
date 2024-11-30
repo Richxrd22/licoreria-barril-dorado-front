@@ -63,6 +63,28 @@ async function listarEmpleado() {
       throw new Error("Error al conectar al servidor");
     }
   }
+
+  async function obtenerEmpleadoPorCorreo(correo) {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch(
+        `http://localhost:7575/empleado/buscarPorCorreo/${correo}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.ok) {
+        const data = response.json();
+        return data;
+      }
+    } catch (error) {
+      throw new Error("Error al conectar al servidor");
+    }
+  }
   async function editarEmpleado(empleado) {
     const token = localStorage.getItem("token");
     try {
@@ -76,7 +98,7 @@ async function listarEmpleado() {
       });
       if (!response.ok && response.status === 406) {
         throw new Error("El Empleado ingresado ya existe.");
-      }
+       }
     } catch (error) {
       if (error.message === "El Empleado ingresado ya existe.") {
         throw error;
@@ -109,10 +131,10 @@ async function listarEmpleado() {
     }
   }
   
-  async function actualizarContrasenaAdmin(empleado) {
+  async function actualizarContrasena(empleado) {
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch(`http://localhost:7575/usuario/cambiar-contraseña-admin`, {
+      const response = await fetch(`http://localhost:7575/usuario/cambiar-contraseña`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -132,12 +154,15 @@ async function listarEmpleado() {
     }
   }
 
+
+
   export const empleadoService = {
     listarEmpleado,
     registrarEmpleado,
     obtenerEmpleadoId,
     editarEmpleado,
     actualizarContrasenaAdmin,
-    editarEmpleadoUsuario
+    editarEmpleadoUsuario,
+    obtenerEmpleadoPorCorreo,
   };
   

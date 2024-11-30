@@ -1,25 +1,10 @@
-import React from 'react'
+import React from 'react';
 import {
-  Button,
-  Input,
-  Modal,
+  Button, Modal,
   ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  Select,
-  SelectItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-  useDisclosure,
+  ModalContent, ModalHeader, useDisclosure
 } from "@nextui-org/react";
 import AddBoxOutlinedIcon from "@mui/icons-material/AddBoxOutlined";
-import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
-import Texto from "../../componentes/Texto";
 import EmpresaForm from '../../formularios/EmpresaForm';
 import ListadoEmpresa from './Acciones/ListadoEmpresa';
 export default function Empresa() {

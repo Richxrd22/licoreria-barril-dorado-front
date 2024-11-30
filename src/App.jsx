@@ -34,26 +34,24 @@ function App() {
   useEffect(() => {
     const handledRoutes = [
       "/",
-      "/producto",
-      "/panel",
-      "/empleados",
-      "/empresa",
-      "/proveedor",
-      "/perfil",
-      "/configuracion",
-      "/admin",
+      "/admin/panel",
       "/admin/producto",
       "/admin/empleado",
       "/admin/empresa",
       "/admin/proveedor",
+      "/empleado/panel",
       "/empleado/producto",
-      "/empleado/empleado",
       "/empleado/empresa",
       "/empleado/proveedor",
+      "/empleado/producto/confirmacion",
+      "/empleado/empleado/confirmacion",
+      "/empleado/empresa/confirmacion",
+      "/empleado/proveedor/confirmacion",
       "/admin/producto/confirmacion",
       "/admin/empleado/confirmacion",
       "/admin/empresa/confirmacion",
       "/admin/proveedor/confirmacion",
+      
     ];
     setHideNavbar(!handledRoutes.includes(location.pathname));
   }, [location.pathname]);
@@ -81,32 +79,33 @@ function RoutesAdministrador() {
     <>
 
       <Routes>
-        <Route exac path='/admin' element={<Panel />} />
+        <Route exac path='/admin/panel' element={<Panel />} />
 
         <Route exac path="/admin/empleado" element={<Empleados />} />
       
-        <Route path="/admin/producto/confirmacion" element={<PrivateRoute formType="producto" />}>
-          <Route index element={<Confirmacion ruta={"/admin/producto"} />} />
-        </Route>
-
         <Route path="/admin/empleado/confirmacion" element={<PrivateRoute formType="empleado" />}>
           <Route index element={<Confirmacion ruta={"/admin/empleado"} />} />
         </Route>
 
+        <Route exac path='/admin/empresa' element={<Empresa/>} />
+        
         <Route path="/admin/empresa/confirmacion" element={<PrivateRoute formType="empresa" />}>
           <Route index element={<Confirmacion ruta={"/admin/empresa"} />} />
         </Route> 
 
+        <Route exac path='/admin/proveedor' element={<Proveedor/>} />
+
         <Route path="/admin/proveedor/confirmacion" element={<PrivateRoute formType="proveedor" />}>
           <Route index element={<Confirmacion ruta={"/admin/proveedor"} />} />
         </Route> 
-        <Route exac path='/admin/empresa' element={<Empresa/>} />
-
-        <Route exac path='/admin/proveedor' element={<Proveedor/>} />
 
         <Route exac path='/admin/categoria' element={"<AgregarCategoria />"} />
 
         <Route exac path='/admin/producto' element={<Producto />} />
+
+        <Route path="/admin/producto/confirmacion" element={<PrivateRoute formType="producto" />}>
+          <Route index element={<Confirmacion ruta={"/admin/producto"} />} />
+        </Route>
 
         <Route path="*" element={<NotFound />} />
 
@@ -131,31 +130,26 @@ function RoutesEmpleados() {
 
       <Routes>
 
-        <Route exac path='/empleado' element={<Panel />} />
-        <Route exac path='/empleado/empresa' element={"hola"} />
-        <Route exac path='/empleado/empresa/listar' element={"hola"} />
-        <Route exac path='/empleado/empresa/editar/:id' element={"hola"} />
+        <Route exac path='/empleado/panel' element={<Panel />} />
 
-        <Route exac path='/empleado/proveedor' element={"hola"} />
-        <Route exac path='/empleado/proveedor/listar' element={"<TablaProveedor />"} />
-        <Route exac path='/empleado/proveedor/editar/:id' element={"<EditarProveedor />"} />
+        <Route exac path='/empleado/empresa' element={<Empresa/>} />
+        
+        <Route path="/empleado/empresa/confirmacion" element={<PrivateRoute formType="empresa" />}>
+          <Route index element={<Confirmacion ruta={"/empleado/empresa"} />} />
+        </Route> 
 
-        <Route exac path='/empleado/categoria' element={"<AgregarCategoria />"} />
-        <Route exac path='/empleado/categoria/listar' element={"<TablaCategoria />"} />
-        <Route exac path='/empleado/categoria/editar/:id' element={"<EditarCategoria />"} />
+        <Route exac path='/empleado/proveedor' element={<Proveedor/>} />
 
-        <Route exac path='/empleado/producto' element={"<AgregarProducto />"} />
-        <Route exac path='/empleado/producto/listar' element={"<TablaProducto />"} />
-        <Route exac path='/empleado/producto/editar/:id' element={"<EditarProducto />"} />
+        <Route path="/empleado/proveedor/confirmacion" element={<PrivateRoute formType="proveedor" />}>
+          <Route index element={<Confirmacion ruta={"/empleado/proveedor"} />} />
+        </Route> 
 
-        <Route exac path='/empleado/cliente' element={"<EditarProducto />"} />
-        <Route exac path='/empleado/cliente/listar' element={"<EditarProducto />"} />
-        <Route exac path='/empleado/cliente/editar/:id' element={"<EditarProducto />"} />
+        <Route exac path='/empleado/producto' element={<Producto />} />
 
-        {/*<Route exac path='/empleado/venta' element={<AgregarVenta />} />
-        <Route exac path='/empleado/venta/listar' element={<TablaVentas />} />
- */}
-
+        <Route path="/empleado/producto/confirmacion" element={<PrivateRoute formType="producto" />}>
+          <Route index element={<Confirmacion ruta={"/empleado/producto"} />} />
+        </Route>
+  
         <Route path="*" element={<NotFound />} />
 
       </Routes>
@@ -166,18 +160,3 @@ function RoutesEmpleados() {
 
 
 export default App;
-/*
-      {!hideNavbar && <Navegador />}
-      <Suspense fallback={<Progress />}>
-        <Routes>
-
-          <Route path="/" element={<Panel />} />
-          <Route path="/panel" element={<Panel />} />
-          <Route path="/producto" element={<Producto />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/empleados" element={<Empleados />} />
-          <Route path="/empresa" element={<Empresa />} />
-          <Route path="/proveedor" element={<Proveedor />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>*/

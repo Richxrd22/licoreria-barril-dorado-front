@@ -15,5 +15,4 @@ export const validacionGestionStock = (cantidadTotal, isReducing) =>
           return true;
         }
       ),
-    // Agrega otras validaciones necesarias para otros campos
   });

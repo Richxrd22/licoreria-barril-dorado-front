@@ -23,15 +23,14 @@ export default function GestionActivo({ onClose, proveedorId, actualizarTabla })
 
   const verificarProductosAsociados = async () => {
     try {
-      const productos = await productoService.listarProducto(); // Traemos todos los productos
-      // Filtramos los productos que tienen el id_proveedor asociado
+      const productos = await productoService.listarProducto(); 
       const productosAsociados = productos.filter(
         (producto) => producto.id_proveedor === proveedorId
       );
-      return productosAsociados.length > 0; // Retorna true si hay productos asociados
+      return productosAsociados.length > 0; 
     } catch (error) {
       console.error('Error al verificar productos asociados:', error);
-      return false; // En caso de error, asumimos que no hay productos asociados
+      return false; 
     }
   };
 
@@ -39,11 +38,10 @@ export default function GestionActivo({ onClose, proveedorId, actualizarTabla })
     try {
       setCargando(true);
 
-      // Verifica si el proveedor tiene productos asociados
       const tieneProductos = await verificarProductosAsociados();
 
       if (tieneProductos) {
-        setEstado('validacion'); // Cambia el estado para mostrar la advertencia
+        setEstado('validacion'); 
         return;
       }
 

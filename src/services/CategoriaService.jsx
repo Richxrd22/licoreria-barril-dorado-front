@@ -11,7 +11,6 @@ async function listarCategoria() {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
     const categorias = await response.json();
-    // Retorna los productos, número total de páginas y total de elementos
     return categorias;
   } catch (error) {
     console.error("Error al listar las categorias:", error);

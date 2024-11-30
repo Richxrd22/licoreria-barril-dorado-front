@@ -5,13 +5,14 @@ import { empresaService } from '../../../services/EmpresaService';
 import { Button, Input, ModalBody, ModalHeader } from '@nextui-org/react';
 import { useFormik } from 'formik';
 import { validacionEmpresaActualizar } from '../../../validaciones/validacionEmpresaActualizar';
+import { useDecodedToken } from '../../../hook/useDecodedToken';
 
 export default function EditarEmpresa({ onClose, empresaId }) {
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null)
   const [empresasExistentes, setEmpresasExistentes] = useState([])
   const { markFormAsSubmitted } = useFormulario(); 
   const navigate = useNavigate();
-
+  const { decodedToken, baseRoute } = useDecodedToken();
   useEffect(() => {
     const cargarDatos = async () => {
       try {
@@ -25,7 +26,7 @@ export default function EditarEmpresa({ onClose, empresaId }) {
           values: {
             ...empresaBuscado
           },
-        });
+        }); 
       } catch (error) {
         console.error("Error al cargar datos:", error);
       }
@@ -53,7 +54,7 @@ export default function EditarEmpresa({ onClose, empresaId }) {
         resetForm();
         onClose();
         markFormAsSubmitted("empresa");
-        navigate("/admin/empresa/confirmacion", {
+        navigate(`${baseRoute}/empresa/confirmacion`, {
           state: {
             mensaje: `Los Datos de la Empresa ${values.nombre} se actualizo con éxito`,
           },

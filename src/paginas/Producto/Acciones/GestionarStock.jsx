@@ -13,6 +13,8 @@ import { useFormulario } from "../../../context/FormularioContext";
 import Progress from "../../../componentes/Progress";
 import { productoService } from "../../../services/ProductoService";
 import { validacionGestionStock } from "../../../validaciones/validacionGestionStock";
+import { useDecodedToken } from "../../../hook/useDecodedToken";
+import { useProductos } from "../../../hook/useProductos";
 
 // Función para calcular nueva cantidad
 const calcularNuevaCantidad = (actual, ingresada, modificador) =>
@@ -58,38 +60,31 @@ export default function GestionarStock({ onClose, productId }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { markFormAsSubmitted } = useFormulario();
   const navigate = useNavigate();
+  const {  producto } = useProductos(productId);
+  const { baseRoute } = useDecodedToken();
 
-  const fetchProducto = async (productId) => {
+  // Función para cargar el producto
+  const fetchProducto = async () => {
     try {
-      const producto = await productoService.obtenerproductoId(productId);
       dispatch({ type: "SET_PRODUCTO", payload: producto });
-      formikAumentarStock.setValues({
-        ...producto,
-        cantidad: "",
-        estado_cantidad: producto.estado_cantidad,
-      });
-      formikReducirStock.setValues({
-        ...producto,
-        cantidad: "",
-        estado_cantidad: producto.estado_cantidad,
-      });
     } catch (error) {
       console.error("Error al obtener datos del producto:", error);
     }
   };
 
+  // Crear configuración de Formik
   const createFormikConfig = (initialQuantityModifier, isReducing) => ({
     initialValues: {
       id_producto: productId,
-      nombre: "",
-      descripcion: "",
+      nombre: producto?.nombre || "",
+      descripcion: producto?.descripcion || "",
       cantidad: "",
-      precio: "",
+      precio: producto?.precio || "",
       estado_cantidad: 1,
-      fecha_produccion: "",
-      fecha_vencimiento: "",
-      id_categoria: "",
-      id_proveedor: "",
+      fecha_produccion: producto?.fecha_produccion || "",
+      fecha_vencimiento: producto?.fecha_vencimiento || "",
+      id_categoria: producto?.id_categoria || "",
+      id_proveedor: producto?.id_proveedor || "",
     },
     validationSchema: validacionGestionStock(
       state.producto?.cantidad,
@@ -98,8 +93,8 @@ export default function GestionarStock({ onClose, productId }) {
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       setSubmitting(true);
       try {
-        const cantidadActual = state.producto.cantidad; // Cantidad actual desde el estado
-        const cantidadIngresada = Number(values.cantidad); // Cantidad ingresada por el usuario
+        const cantidadActual = state.producto?.cantidad; 
+        const cantidadIngresada = Number(values.cantidad);
         const nuevaCantidad = calcularNuevaCantidad(
           cantidadActual,
           cantidadIngresada,
@@ -119,7 +114,7 @@ export default function GestionarStock({ onClose, productId }) {
         resetForm();
         onClose();
         markFormAsSubmitted("producto");
-        navigate("/admin/producto/confirmacion", {
+        navigate(`${baseRoute}/producto/confirmacion`, {
           state: {
             mensaje: `Stock del Producto ${values.nombre} ${initialQuantityModifier > 0 ? "aumentado" : "reducido"
               } con éxito a ${nuevaCantidad}`,
@@ -137,11 +132,22 @@ export default function GestionarStock({ onClose, productId }) {
   const formikReducirStock = useFormik(createFormikConfig(-1, true));
 
   useEffect(() => {
-    if (productId) fetchProducto(productId);
-  }, [productId]);
+    if (producto) {
+      fetchProducto();
+      formikAumentarStock.setValues({
+        ...producto,
+        cantidad: "",
+        estado_cantidad: producto.estado_cantidad,
+      });
+      formikReducirStock.setValues({
+        ...producto,
+        cantidad: "",
+        estado_cantidad: producto.estado_cantidad,
+      });
+    }
+  }, [producto, productId]); 
 
   if (!state.producto) return <Progress />;
-
   return (
     <>
       <ModalHeader className="flex flex-col gap-1">
@@ -156,7 +162,7 @@ export default function GestionarStock({ onClose, productId }) {
             <Tab
               key="reducir_stock"
               title="Reducir Stock"
-              isDisabled={state.producto.cantidad === 0} // Bloquea si cantidad es 0
+              isDisabled={state.producto.cantidad === 0} 
             >
               <StockForm formik={formikReducirStock} label="Reducir Stock" />
             </Tab>

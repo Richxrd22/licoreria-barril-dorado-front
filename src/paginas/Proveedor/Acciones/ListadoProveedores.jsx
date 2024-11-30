@@ -10,9 +10,11 @@ import Texto from '../../../componentes/Texto';
 import InfoProveedor from './InfoProveedor';
 import EditarProveedor from './EditarProveedor';
 import GestionActivo from './GestionActivo';
+import { useDecodedToken } from '../../../hook/useDecodedToken';
 
 export default function ListadoProveedores() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { rol } = useDecodedToken();
   const INITIAL_VISIBLE_COLUMNS = [
     "nombre",
     "apellido",
@@ -44,7 +46,7 @@ export default function ListadoProveedores() {
       const data = await proveedorService.listarProveedor();
       setProveedores(data);
       console.log(data);
-      
+
     } catch (error) {
       console.error("Error al obtener Proveedores:", error);
     }
@@ -64,23 +66,23 @@ export default function ListadoProveedores() {
 
   const filteredItems = useMemo(() => {
     let filteredProveedores = [...proveedores];
-  
+
     if (hasSearchFilter) {
       filteredProveedores = filteredProveedores.filter((proveedor) =>
         proveedor.nombre.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
-  
+
     if (statusFilter.size > 0) {
       const selectedStatuses = Array.from(statusFilter).map(Number);
       filteredProveedores = filteredProveedores.filter((proveedor) =>
         selectedStatuses.includes(Number(proveedor.activo))
       );
     }
-  
+
     return filteredProveedores;
   }, [proveedores, filterValue, statusFilter]);
-  
+
 
   const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
@@ -147,19 +149,15 @@ export default function ListadoProveedores() {
                 >
                   Ver
                 </DropdownItem>
-                {proveedor.activo !== 0 && (
+
+                {rol && (
                   <DropdownItem
-                    onPress={() => openModal(proveedor.id_proveedor, "user")}
+                    onPress={() => openModal(proveedor.id_proveedor, "state")}
                   >
-                    Gestion Usuario
+                    Cambiar Estado
                   </DropdownItem>
                 )}
 
-                <DropdownItem
-                  onPress={() => openModal(proveedor.id_proveedor, "state")}
-                >
-                  Cambiar Estado
-                </DropdownItem>
                 {
                   proveedor.activo !== 0 && (
                     <DropdownItem
@@ -213,7 +211,7 @@ export default function ListadoProveedores() {
   const openModal = (proveedorId, action) => {
     setSelectedProveedorId(proveedorId);
     setModalAction(action);
-    onOpen(); 
+    onOpen();
   };
 
   const topContent = useMemo(() => {
@@ -324,7 +322,7 @@ export default function ListadoProveedores() {
         />
         <div className="hidden sm:flex w-[30%] justify-end gap-2">
           <Button
-            isDisabled={page === 1} // Cambié `pages === 1` a `page === 1`
+            isDisabled={page === 1} 
             size="sm"
             variant="flat"
             onPress={onPreviousPage}
@@ -332,7 +330,7 @@ export default function ListadoProveedores() {
             Anterior
           </Button>
           <Button
-            isDisabled={page === pages} // Cambié `pages === 1` a `page === pages`
+            isDisabled={page === pages} 
             size="sm"
             variant="flat"
             onPress={onNextPage}
@@ -342,7 +340,7 @@ export default function ListadoProveedores() {
         </div>
       </div>
     );
-  }, [page, pages]); // Solo dependencias relevantes
+  }, [page, pages]); 
 
   const actualizarTabla = (proveedorActualizado) => {
     setProveedores((prevProveedores) =>
@@ -406,13 +404,7 @@ export default function ListadoProveedores() {
                     proveedorId={selectedProveedorId}
                   />
                 );
-              case "user":
-                return (
-                  <GestionUsuario
-                    onClose={onClose}
-                    proveedorId={selectedProveedorId}
-                  />
-                );
+
               case "edit":
                 return (
                   <EditarProveedor

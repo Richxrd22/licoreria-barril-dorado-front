@@ -5,12 +5,13 @@ import validacionEmpresa from "../../validaciones/validacionEmpresa";
 import { useFormulario } from "../../context/FormularioContext";
 import { useNavigate } from "react-router-dom";
 import { empresaService } from "../../services/EmpresaService";
+import { useDecodedToken } from "../../hook/useDecodedToken";
 
 export default function EmpresaForm({onClose}) {
   const [empresas, setEmpresa] = useState([])
   const { markFormAsSubmitted } = useFormulario();  // Función para actualizar el estado
   const navigate = useNavigate();
-
+  const { decodedToken, baseRoute } = useDecodedToken();
   const fetchEmpresa = async () => {
     try {
       const data = await empresaService.listarEmpresas();
@@ -40,7 +41,7 @@ export default function EmpresaForm({onClose}) {
         markFormAsSubmitted('empresa');
 
         // Redirigimos a la ruta de confirmación del producto
-        navigate("/admin/empresa/confirmacion", {
+        navigate(`${baseRoute}/empresa/confirmacion`, {
           state: {
             mensaje: `Empresa ${values.nombre} Registrada con Exito`,
           },

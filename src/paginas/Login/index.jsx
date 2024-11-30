@@ -1,7 +1,7 @@
 import { Input } from "@nextui-org/react";
 import React, { useState } from "react";
-import { EyeSlashFilledIcon } from "./Icons/EyeSlashFilledIcon";
-import { EyeFilledIcon } from "./Icons/EyeFilledIcon";
+import { EyeSlashFilledIcon } from "../../../public/Icons/EyeSlashFilledIcon";
+import { EyeFilledIcon } from "../../../public/Icons/EyeFilledIcon";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import { validationSchema } from "../../paginas/Login/Validacion";
@@ -25,9 +25,9 @@ export default function Login() {
         const decodedToken = jwtDecode(token);
         const rol = decodedToken.roles;
         if (rol === "ROLE_ADMIN") {
-          window.location.href = "/admin";
+          window.location.href = "/admin/panel";
         } else {
-          window.location.href = "/empleado";
+          window.location.href = "/empleado/panel";
         }
         resetForm();
       } catch (error) {

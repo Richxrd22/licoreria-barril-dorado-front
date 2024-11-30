@@ -6,13 +6,14 @@ import { useNavigate } from 'react-router-dom';
 import { useFormulario } from "../../context/FormularioContext";
 import { proveedorService } from "../../services/ProveedorService";
 import { empresaService } from '../../services/EmpresaService';
+import { useDecodedToken } from '../../hook/useDecodedToken';
 export default function ProveedorForm({ onClose }) {
 
   const [proveedores, setProveedores] = useState([])
   const [empresas, setEmpresas] = useState([])
   const { markFormAsSubmitted } = useFormulario();  // Función para actualizar el estado
   const navigate = useNavigate();
-
+  const { decodedToken, baseRoute } = useDecodedToken();
   const fetchProveedores = async () => {
     try {
       const data = await proveedorService.listarProveedor();
@@ -23,7 +24,7 @@ export default function ProveedorForm({ onClose }) {
   };
   const fetchEmpresas = async () => {
     try {
-      const data = await empresaService.listarEmpresas();
+      const data = await empresaService.listarEmpresasNoUsadas();
       setEmpresas(data);
     } catch (error) {
       console.error("Error al obtener Empresas:", error);
@@ -51,7 +52,7 @@ export default function ProveedorForm({ onClose }) {
         resetForm();
         onClose();
         markFormAsSubmitted('proveedor');
-        navigate("/admin/proveedor/confirmacion", {
+        navigate(`${baseRoute}/proveedor/confirmacion`, {
           state: {
             mensaje: `Proveedor ${values.nombre} Registrado con Exito`,
           },
