@@ -1,9 +1,29 @@
 import { useState, useEffect } from "react";
 import { productoService } from "../services/ProductoService";
 
+// Función para filtrar productos por vencimiento o bajo stock
+const filtrarProductos = (productos, tipoFiltro) => {
+  const currentDate = new Date();
+  return productos.filter((producto) => {
+    if (tipoFiltro === "vencimiento" && producto.fecha_vencimiento) {
+      const fechaVencimiento = new Date(producto.fecha_vencimiento);
+      const diffMilliseconds = fechaVencimiento - currentDate;
+      const diffDays = Math.floor(diffMilliseconds / (1000 * 3600 * 24));
+      // Si el producto va a vencer en los próximos 15 días
+      return diffDays <= 15 && diffDays > 0;
+    }
+    if (tipoFiltro === "bajoStock" && producto.cantidad !== undefined) {
+      // Verifica si el producto tiene 15 unidades o menos en stock
+      return producto.cantidad <= 15 && producto.estado_cantidad;
+    }
+    return false;
+  });
+};
+
 export const useProductos = (productId = null) => {
   const [productos, setProductos] = useState([]);
   const [producto, setProducto] = useState(null);
+  const [productosFiltrados, setProductosFiltrados] = useState([]); // Array combinado
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -12,6 +32,16 @@ export const useProductos = (productId = null) => {
     try {
       const data = await productoService.listarProducto();
       setProductos(data);
+      
+      // Filtrar productos por vencimiento y bajo stock y combinarlos en un solo array
+      const productosVencimientoFiltrados = filtrarProductos(data, "vencimiento").map(producto => ({ ...producto, tipo: "vencimiento" }));
+      const productosBajoStockFiltrados = filtrarProductos(data, "bajoStock").map(producto => ({ ...producto, tipo: "bajoStock" }));
+      
+      // Combinamos ambos arrays en uno solo
+      setProductosFiltrados([
+        ...productosVencimientoFiltrados,
+        ...productosBajoStockFiltrados
+      ]);
     } catch (err) {
       setError(err);
     } finally {
@@ -37,7 +67,15 @@ export const useProductos = (productId = null) => {
     } else {
       fetchProductos();
     }
-  }, [productId]);
+  }, [productId]); // Ejecutar solo cuando cambia productId
 
-  return { productos, producto, isLoading, error, fetchProductos, fetchProductoPorId };
+  return {
+    productos,
+    producto,
+    productosFiltrados,  // Un solo array con ambos filtros
+    isLoading,
+    error,
+    fetchProductos,
+    fetchProductoPorId,
+  };
 };

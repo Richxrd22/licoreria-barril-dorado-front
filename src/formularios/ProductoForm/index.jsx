@@ -96,7 +96,6 @@ export default function ProductoForm({ onClose }) {
     try {
       const data = await categoriaService.listarCategoria();
       setCategorias(data);
-      console.log(data);
     } catch (error) {
       console.error("Error al obtener proveedores:", error);
       alert("No se pudo cargar la lista de proveedores");
@@ -109,7 +108,6 @@ export default function ProductoForm({ onClose }) {
       // Filtrar proveedores con estado activo en 1
       const proveedoresActivos = data.filter(proveedor => proveedor.activo === 1);
       setProveedores(proveedoresActivos);
-      console.log(proveedoresActivos);
     } catch (error) {
       console.error("Error al obtener proveedores:", error);
       alert("No se pudo cargar la lista de proveedores");

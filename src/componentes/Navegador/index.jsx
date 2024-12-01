@@ -83,7 +83,6 @@ export default function Navegador() {
           correo
         );
         setEmpleadoSeleccionado(empleadoBuscado);
-        console.log(empleadoBuscado);
         const data = await empleadoService.listarEmpleado();
         setEmpleadosExistentes(data);
 
@@ -123,7 +122,7 @@ export default function Navegador() {
     validationSchema: validacionEmpleadoContrasena,
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
-        await empleadoService.actualizarContrasenaAdmin(values);
+        await empleadoService.actualizarContrasena(values);
         closeModal();
         handleConfigClick("completadoPassword")
         resetForm();

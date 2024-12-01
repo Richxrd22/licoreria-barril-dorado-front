@@ -45,7 +45,6 @@ export default function ListadoProveedores() {
     try {
       const data = await proveedorService.listarProveedor();
       setProveedores(data);
-      console.log(data);
 
     } catch (error) {
       console.error("Error al obtener Proveedores:", error);

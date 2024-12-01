@@ -161,7 +161,7 @@ async function listarEmpleado() {
     registrarEmpleado,
     obtenerEmpleadoId,
     editarEmpleado,
-    actualizarContrasenaAdmin,
+    actualizarContrasena,
     editarEmpleadoUsuario,
     obtenerEmpleadoPorCorreo,
   };

@@ -28,6 +28,7 @@ import {
   columns,
   statusOptionsActivo,
   statusOptionsEstadoCantidad,
+  statusOptionsVencimiento,
 } from "./adicionales/datos";
 import { VerticalDotsIcon } from "../../../../public/Icons/VerticalDotsIcon";
 import { SearchIcon } from "../../../../public/Icons/SearchIcon";
@@ -39,7 +40,7 @@ import InfoProducto from "././InfoProducto";
 import GestionActivo from "./GestionActivo";
 import { useProductos } from "../../../hook/useProductos";
 import { useDecodedToken } from "../../../hook/useDecodedToken";
-export default function ListadoProductos() {
+export default function ListadoProductos({ productos = [], showFilters = true }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const { rol } = useDecodedToken();
   const INITIAL_VISIBLE_COLUMNS = [
@@ -47,12 +48,12 @@ export default function ListadoProductos() {
     "descripcion",
     "cantidad",
     "empresa",
+    "fecha_vencimiento",
     "estado_cantidad",
     "activo",
     "acciones",
   ];
-  const { productos, setProductos } =
-    useProductos();
+
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [modalAction, setModalAction] = useState(null);
   const [visibleColumns, setVisibleColumns] = React.useState(
@@ -60,6 +61,9 @@ export default function ListadoProductos() {
   );
   const [statusFilterActivo, setStatusFilterActivo] = useState(new Set(["1"]));
   const [statusFilterEstadoStock, setStatusFilterEstadoStock] = useState(
+    new Set(["1"])
+  );
+  const [statusFilterVencimiento, setStatusFilterVencimiento] = useState(
     new Set(["1"])
   );
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -78,6 +82,8 @@ export default function ListadoProductos() {
       Array.from(visibleColumns).includes(column.uid)
     );
   }, [visibleColumns]);
+
+
 
   const filteredItems = useMemo(() => {
     let filteredProduct = [...productos];
@@ -106,8 +112,34 @@ export default function ListadoProductos() {
       );
     }
 
+    if (statusFilterVencimiento.size > 0) {
+      const selectedStatuses = Array.from(statusFilterVencimiento).map((key) => parseInt(key, 10));
+
+      filteredProduct = filteredProduct.filter((product) => {
+        const fechaVencimiento = new Date(product.fecha_vencimiento);
+        const fechaActual = new Date();
+
+        if (isNaN(fechaVencimiento)) return false;
+
+        const isVencido = fechaVencimiento < fechaActual;
+        const isNoVencido = fechaVencimiento >= fechaActual;
+
+        return (
+          (selectedStatuses.includes(0) && isVencido) ||
+          (selectedStatuses.includes(1) && isNoVencido)
+        );
+      });
+    }
+
     return filteredProduct;
-  }, [productos, filterValue, statusFilterEstadoStock, statusFilterActivo]);
+  }, [
+    productos,
+    filterValue,
+    statusFilterEstadoStock,
+    statusFilterActivo,
+    statusFilterVencimiento,
+  ]);
+
 
   const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
@@ -252,7 +284,7 @@ export default function ListadoProductos() {
     setProductos((prevProductos) => {
       return prevProductos.map((producto) =>
         producto.id_producto === productoActualizado.id_producto
-          ? { ...producto, ...productoActualizado } 
+          ? { ...producto, ...productoActualizado }
           : producto
       );
     });
@@ -271,65 +303,106 @@ export default function ListadoProductos() {
             onValueChange={onSearchChange}
           />
           <div className="flex gap-3">
-            <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button
-                  endContent={<ChevronDownIcon className="text-small" />}
-                  variant="flat"
-                >
-                  Estado Cantidad
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label="Filtrar por estado cantidad"
-                closeOnSelect={false}
-                selectedKeys={statusFilterEstadoStock}
-                selectionMode="multiple"
-                onSelectionChange={(keys) =>
-                  setStatusFilterEstadoStock(new Set([...keys]))
-                }
-              >
-                {statusOptionsEstadoCantidad.map((status) => (
-                  <DropdownItem
-                    key={status.uid.toString()}
-                    className="capitalize"
+            {/* Filtro de Vencimiento solo si showFilters es true */}
+            {showFilters && (
+              <Dropdown>
+                <DropdownTrigger className="hidden sm:flex">
+                  <Button
+                    endContent={<ChevronDownIcon className="text-small" />}
+                    variant="flat"
                   >
-                    {status.name}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-            <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button
-                  endContent={<ChevronDownIcon className="text-small" />}
-                  variant="flat"
+                    Vencimiento
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  disallowEmptySelection
+                  aria-label="Filtrar por vencimiento"
+                  closeOnSelect={false}
+                  selectionMode="multiple"
+                  selectedKeys={statusFilterVencimiento}
+                  onSelectionChange={(keys) => {
+                    setStatusFilterVencimiento(new Set([...keys]));
+                  }}
                 >
-                  Estado
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label="Filtrar por estado"
-                closeOnSelect={false}
-                selectedKeys={statusFilterActivo}
-                selectionMode="multiple"
-                onSelectionChange={(keys) =>
-                  setStatusFilterActivo(new Set([...keys]))
-                }
-              >
-                {statusOptionsActivo.map((status) => (
-                  <DropdownItem
-                    key={status.uid.toString()}
-                    className="capitalize"
+                  {statusOptionsVencimiento.map((status) => (
+                    <DropdownItem
+                      key={status.uid.toString()}
+                      className="capitalize"
+                    >
+                      {status.name}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
+            )}
+  
+            {/* Filtro de Estado Cantidad solo si showFilters es true */}
+            {showFilters && (
+              <Dropdown>
+                <DropdownTrigger className="hidden sm:flex">
+                  <Button
+                    endContent={<ChevronDownIcon className="text-small" />}
+                    variant="flat"
                   >
-                    {status.name}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-
+                    Estado Cantidad
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  disallowEmptySelection
+                  aria-label="Filtrar por estado cantidad"
+                  closeOnSelect={false}
+                  selectedKeys={statusFilterEstadoStock}
+                  selectionMode="multiple"
+                  onSelectionChange={(keys) =>
+                    setStatusFilterEstadoStock(new Set([...keys]))
+                  }
+                >
+                  {statusOptionsEstadoCantidad.map((status) => (
+                    <DropdownItem
+                      key={status.uid.toString()}
+                      className="capitalize"
+                    >
+                      {status.name}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
+            )}
+  
+            {/* Filtro de Estado solo si showFilters es true */}
+            {showFilters && (
+              <Dropdown>
+                <DropdownTrigger className="hidden sm:flex">
+                  <Button
+                    endContent={<ChevronDownIcon className="text-small" />}
+                    variant="flat"
+                  >
+                    Estado
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  disallowEmptySelection
+                  aria-label="Filtrar por estado"
+                  closeOnSelect={false}
+                  selectedKeys={statusFilterActivo}
+                  selectionMode="multiple"
+                  onSelectionChange={(keys) =>
+                    setStatusFilterActivo(new Set([...keys]))
+                  }
+                >
+                  {statusOptionsActivo.map((status) => (
+                    <DropdownItem
+                      key={status.uid.toString()}
+                      className="capitalize"
+                    >
+                      {status.name}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
+            )}
+  
+            {/* Filtro de Columnas siempre visible */}
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
                 <Button
@@ -375,16 +448,18 @@ export default function ListadoProductos() {
       </div>
     );
   }, [
+    showFilters, // Asegúrate de agregar showFilters al arreglo de dependencias
     filterValue,
     statusFilterEstadoStock,
     statusFilterActivo,
+    statusFilterVencimiento,
     visibleColumns,
     onRowsPerPageChange,
     productos.length,
     onSearchChange,
     hasSearchFilter,
   ]);
-
+  
   const bottomContent = useMemo(() => {
     return (
       <div className="py-2 px-2 flex justify-between items-center">
@@ -421,7 +496,6 @@ export default function ListadoProductos() {
 
   return (
     <>
-      <Texto titulo texto={"Listado de Productos"} />
       <Table
         aria-label="Example table with custom cells, pagination and sorting"
         bottomContent={bottomContent}

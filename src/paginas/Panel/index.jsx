@@ -1,8 +1,7 @@
-import React from "react";
-import { Bar } from "react-chartjs-2";
-import { Pie } from "react-chartjs-2";
+import React, { useEffect, useState } from "react";
+import { Bar, Pie } from "react-chartjs-2";
 import {
-  Chart as CharJS,
+  Chart as ChartJS,
   CategoryScale,
   LinearScale,
   PointElement,
@@ -22,8 +21,13 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
+import ListadoProductos from "../Producto/Acciones/ListadoProductos";
 import Texto from "../../componentes/Texto";
-CharJS.register(
+import { useProductos } from "../../hook/useProductos";
+import Progress from "../../componentes/Progress";
+
+// Registrar componentes de Chart.js
+ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
@@ -34,126 +38,154 @@ CharJS.register(
   Filler,
   ArcElement
 );
-var beneficios = [72, 56, 20, 36, 80, 40, 30, 20, 25, 30, 12, 60];
-var meses = [
-  "Enero",
-  "Febrero",
-  "Marzo",
-  "Abril",
-  "Mayo",
-  "Junio",
-  "Julio",
-  "Agosto",
-  "Septiembre",
-  "Octubre",
-  "Noviembre",
-  "Diciembre",
-];
 
-var misoptions = {
-  responsive: true,
-  animation: false,
-  aspectRatio: 2,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      display: false,
-    },
-    title: {
-      display: true,
-      text: "Movimientos de Stock por Periodo", // El texto del título
-      font: {
-        size: 18, // Tamaño de la fuente
-        weight: "bold", // Peso de la fuente
-      },
-      padding: {
-        top: 10,
-        bottom: 30,
-      },
-      align: "center", // Alineación del título
-    },
-  },
-  scales: {
-    y: {
-      min: 0,
-      max: 100,
-    },
-    x: {
-      ticks: { color: "rgba(0, 220, 195)" },
-    },
-  },
-};
+const Panel = () => {
+  const { productos,productosFiltrados } = useProductos();
+  const [productosNoVencidos, setProductosNoVencidos] = useState([]);
+  const [chartData, setChartData] = useState(null);
 
-var midata = {
-  labels: meses,
-  datasets: [
-    {
-      label: "Beneficios",
-      data: beneficios,
-      backgroundColor: "rgba(0, 220, 195, 0.5)",
-    },
-  ],
-};
-var options = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    title: {
-      display: true,
-      text: "Distribución del Inventario por Categoría", // El texto del título
-      font: {
-        size: 18, // Tamaño de la fuente
-        weight: "bold", // Peso de la fuente
-      },
-      padding: {
-        top: 10,
-        bottom: 30,
-      },
-      align: "center", // Alineación del título
-    },
-  },
-};
+  useEffect(() => {
+    if (productos?.length > 0) {
+      const currentDate = new Date();
 
-var data = {
-  labels: ["Vinos", "Destilados", "Cervezas", "Aperitivos", "Digestivos"],
-  datasets: [
-    {
-      label: "Cantidad",
-      data: [35, 20, 20, 15, 10],
-      backgroundColor: [
-        "rgba(255, 99, 132, 0.2)",
-        "rgba(255, 206, 86, 0.2)",
-        "rgba(54, 162, 235, 0.2)",
-        "rgba(75, 192, 192, 0.2)",
-        "rgba(153, 102, 255, 0.2)",
-      ],
-      borderColor: [
-        "rgba(255, 99, 132, 1)",
-        "rgba(255, 206, 86, 1)",
-        "rgba(54, 162, 235, 1)",
-        "rgba(75, 192, 192, 1)",
-        "rgba(153, 102, 255, 1)",
-      ],
-      borderWidth: 1,
-    },
-  ],
-};
+      // Filtrar productos no vencidos
+      const noVencidos = productos.filter((producto) => {
+        const fechaVencimiento = new Date(producto.fecha_vencimiento);
+        return fechaVencimiento > currentDate; // Solo productos cuya fecha de vencimiento es futura
+      });
 
-export default function Panel() {
+      setProductosNoVencidos(noVencidos);
+
+      // Agrupar productos no vencidos por categoría y sumar cantidades
+      const categoriaTotales = noVencidos.reduce((acc, producto) => {
+        const { categoria, cantidad } = producto;
+        acc[categoria] = (acc[categoria] || 0) + cantidad;
+        return acc;
+      }, {});
+
+      // Generar colores dinámicos para las categorías
+      const dynamicColors = Object.keys(categoriaTotales).map(
+        () => `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.5)`
+      );
+
+      // Preparar los datos para Chart.js
+      const labels = Object.keys(categoriaTotales);
+      const data = Object.values(categoriaTotales);
+
+      setChartData({
+        labels,
+        datasets: [
+          {
+            label: "Cantidad de Productos",
+            data,
+            backgroundColor: dynamicColors,
+            borderColor: dynamicColors.map(color => color.replace("0.5", "1")),
+            borderWidth: 1,
+          },
+        ],
+      });
+    }
+  }, [productos]);
+
+  // Opciones de gráficos
+  const pieChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      title: {
+        display: true,
+        text: "Distribución de Productos No Vencidos por Categoría",
+        font: {
+          size: 18,
+          weight: "bold",
+        },
+        padding: {
+          top: 10,
+          bottom: 30,
+        },
+        align: "center",
+      },
+    },
+  };
+
+  const barChartOptions = {
+    responsive: true,
+    animation: false,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      title: {
+        display: true,
+        text: "Movimientos de Stock por Periodo",
+        font: {
+          size: 18,
+          weight: "bold",
+        },
+        padding: {
+          top: 10,
+          bottom: 30,
+        },
+        align: "center",
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 10,
+        },
+      },
+      x: {
+        ticks: { color: "rgba(0, 220, 195)" },
+      },
+    },
+  };
+
+  // Datos estáticos del gráfico de barras
+  const barChartData = {
+    labels: [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre",
+    ],
+    datasets: [
+      {
+        label: "Beneficios",
+        data: [72, 56, 20, 36, 80, 40, 30, 20, 25, 30, 12, 60],
+        backgroundColor: "rgba(0, 220, 195, 0.5)",
+      },
+    ],
+  };
+
   return (
-    <div className="flex flex-col py-5 lg:py-10  w-11/12 m-auto">
+    <div className="flex flex-col py-5 lg:py-10 w-11/12 m-auto gap-4">
       <Texto
         titulo
         texto={"Visión General del Inventario y Movimientos de Stock"}
       />
-      <div className="flex justify-around py-5 gap-5  lg:gap-10  flex-wrap w-full">
+      <div className="flex justify-around py-5 gap-5 lg:gap-10 flex-wrap w-full">
         <Card
           isFooterBlurred
           radius="lg"
           className="border-none w-full lg:w-2/6 lg:flex-1"
         >
           <div className="relative w-full h-64 p-5">
-            <Pie data={data} options={options} />
+            {chartData ? (
+              <Pie data={chartData} options={pieChartOptions} />
+            ) : (
+              <Progress/>
+            )}
           </div>
         </Card>
         <Card
@@ -162,44 +194,14 @@ export default function Panel() {
           className="border-none w-full lg:w-2/6 lg:flex-1"
         >
           <div className="relative w-full h-64 p-5">
-            {/* Ajusta la altura según sea necesario */}
-            <Bar data={midata} options={misoptions} />
+            <Bar data={barChartData} options={barChartOptions} />
           </div>
         </Card>
       </div>
-      <Texto titulo texto={"Productos con Stock Crítico"} />
-      <Table
-        aria-label="Example static collection table"
-        className=" pt-5"
-      >
-        <TableHeader>
-          <TableColumn>NAME</TableColumn>
-          <TableColumn>ROLE</TableColumn>
-          <TableColumn>STATUS</TableColumn>
-        </TableHeader>
-        <TableBody>
-          <TableRow key="1">
-            <TableCell>Tony Reichert</TableCell>
-            <TableCell>CEO</TableCell>
-            <TableCell>Active</TableCell>
-          </TableRow>
-          <TableRow key="2">
-            <TableCell>Zoey Lang</TableCell>
-            <TableCell>Technical Lead</TableCell>
-            <TableCell>Paused</TableCell>
-          </TableRow>
-          <TableRow key="3">
-            <TableCell>Jane Fisher</TableCell>
-            <TableCell>Senior Developer</TableCell>
-            <TableCell>Active</TableCell>
-          </TableRow>
-          <TableRow key="4">
-            <TableCell>William Howard</TableCell>
-            <TableCell>Community Manager</TableCell>
-            <TableCell>Vacation</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+      <Texto titulo texto={"Productos en Stock Crítico y Próximos a Vencer"} />
+      <ListadoProductos productos={productosFiltrados} showFilters={false} />
     </div>
   );
-}
+};
+
+export default Panel;

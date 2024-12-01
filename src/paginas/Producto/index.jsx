@@ -21,10 +21,13 @@ import AddBoxOutlinedIcon from "@mui/icons-material/AddBoxOutlined";
 
 import ProductoForm from "../../formularios/ProductoForm";
 import ListadoProductos from "./Acciones/ListadoProductos";
+import { useProductos } from "../../hook/useProductos";
+import Texto from "../../componentes/Texto";
 
 export default function Producto() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
+  const { productos } =
+    useProductos();
   return (
     <div className="flex flex-col py-5 lg:py-10  w-11/12 m-auto gap-4">
       <div>
@@ -36,7 +39,8 @@ export default function Producto() {
           <span>Agregar Producto</span>
         </Button>
       </div>
-      <ListadoProductos />
+      <Texto titulo texto={"Listado de Productos"} />
+      <ListadoProductos productos={productos} />
       <Modal size="2xl" isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (

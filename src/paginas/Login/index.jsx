@@ -7,11 +7,15 @@ import { useFormik } from "formik";
 import { validationSchema } from "../../paginas/Login/Validacion";
 import { login } from "../../services/LoginService";
 import { jwtDecode } from "jwt-decode";
+import Progress from "../../componentes/Progress";
 
 export default function Login() {
   const [isVisible, setIsVisible] = useState(false);
+  const [loading, setLoading] = useState(false); 
   const navigate = useNavigate();
+
   const toggleVisibility = () => setIsVisible(!isVisible);
+
   const formik = useFormik({
     initialValues: {
       correo: "",
@@ -19,11 +23,14 @@ export default function Login() {
     },
     validationSchema: validationSchema,
     onSubmit: async (values, { setSubmitting, resetForm }) => {
+      setLoading(true); 
       try {
         const token = await login(values);
         localStorage.setItem("token", token);
+
         const decodedToken = jwtDecode(token);
         const rol = decodedToken.roles;
+
         if (rol === "ROLE_ADMIN") {
           window.location.href = "/admin/panel";
         } else {
@@ -32,15 +39,18 @@ export default function Login() {
         resetForm();
       } catch (error) {
         console.log("Error al iniciar sesión. Verifica tus credenciales.");
-
       } finally {
         setSubmitting(false);
+        setLoading(false); 
       }
     },
   });
+
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8"
-    style={{ minHeight: "calc(100vh - 90px)" }}>
+    <div
+      className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8"
+      style={{ minHeight: "calc(100vh - 90px)" }}
+    >
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <img
           alt="Your Company"
@@ -53,7 +63,11 @@ export default function Login() {
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form onSubmit={formik.handleSubmit} method="POST" className="space-y-6">
+        <form
+          onSubmit={formik.handleSubmit}
+          method="POST"
+          className="space-y-6"
+        >
           <div>
             <Input
               type="email"
@@ -115,6 +129,8 @@ export default function Login() {
           </div>
         </form>
       </div>
+
+      {loading && <Progress />} 
     </div>
   );
 }

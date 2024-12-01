@@ -9,6 +9,7 @@ const columns = [
 
   { name: "Fecha de Producción", uid: "fecha_produccion" },
 
+  
   { name: "Fecha de Vencimiento", uid: "fecha_vencimiento" },
   { name: "Estado Cantidad", uid: "estado_cantidad", sortable: true },
   { name: "Activo", uid: "activo", sortable: true },
@@ -23,5 +24,9 @@ const statusOptionsActivo = [
   { uid: "1", name: "Activo" },
   { uid: "0", name: "Inactivo" },
 ];
+const statusOptionsVencimiento = [
+  { uid: "1", name: "No Vencidos" },
+  { uid: "0", name: "Vencidos" },
+];
 
-export { columns, statusOptionsEstadoCantidad, statusOptionsActivo };
+export { columns, statusOptionsEstadoCantidad, statusOptionsActivo,statusOptionsVencimiento };

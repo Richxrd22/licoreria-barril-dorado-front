@@ -44,7 +44,7 @@ export default function GestionUsuario({ onClose, employeeId }) {
       setSubmitting(true);
       try {
 
-        await empleadoService.actualizarContrasenaAdmin(values);
+        await empleadoService.actualizarContrasena(values);
         resetForm();
         onClose();
         markFormAsSubmitted("empleado");
