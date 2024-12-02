@@ -15,6 +15,7 @@ import { productoService } from "../../../services/ProductoService";
 import { validacionGestionStock } from "../../../validaciones/validacionGestionStock";
 import { useDecodedToken } from "../../../hook/useDecodedToken";
 import { useProductos } from "../../../hook/useProductos";
+import { movimientoService } from "../../../services/MovimientoService";  // Suponiendo que tienes este servicio
 
 // Función para calcular nueva cantidad
 const calcularNuevaCantidad = (actual, ingresada, modificador) =>
@@ -60,7 +61,7 @@ export default function GestionarStock({ onClose, productId }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { markFormAsSubmitted } = useFormulario();
   const navigate = useNavigate();
-  const {  producto } = useProductos(productId);
+  const { producto } = useProductos(productId);
   const { baseRoute } = useDecodedToken();
 
   // Función para cargar el producto
@@ -73,7 +74,7 @@ export default function GestionarStock({ onClose, productId }) {
   };
 
   // Crear configuración de Formik
-  const createFormikConfig = (initialQuantityModifier, isReducing) => ({
+  const createFormikConfig = (initialQuantityModifier, isReducing, tipoMovimiento) => ({
     initialValues: {
       id_producto: productId,
       nombre: producto?.nombre || "",
@@ -86,10 +87,7 @@ export default function GestionarStock({ onClose, productId }) {
       id_categoria: producto?.id_categoria || "",
       id_proveedor: producto?.id_proveedor || "",
     },
-    validationSchema: validacionGestionStock(
-      state.producto?.cantidad,
-      isReducing
-    ),
+    validationSchema: validacionGestionStock(state.producto?.cantidad, isReducing),
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       setSubmitting(true);
       try {
@@ -109,6 +107,15 @@ export default function GestionarStock({ onClose, productId }) {
           estado_cantidad: nuevoEstadoCantidad,
         };
 
+        // Aquí creas el movimiento de stock
+        await movimientoService.registrarMovimiento({
+          id_producto: productId,
+          cantidad: cantidadIngresada,
+          fecha_movimiento: new Date().toISOString().split('T')[0],  // Asignando fecha de hoy
+          tipo_movimiento: tipoMovimiento,
+        });
+
+        // Luego actualizas el producto
         await productoService.editarProducto(productoActualizado);
 
         resetForm();
@@ -128,8 +135,8 @@ export default function GestionarStock({ onClose, productId }) {
     },
   });
 
-  const formikAumentarStock = useFormik(createFormikConfig(1, false));
-  const formikReducirStock = useFormik(createFormikConfig(-1, true));
+  const formikAumentarStock = useFormik(createFormikConfig(1, false, "ENTRADA"));
+  const formikReducirStock = useFormik(createFormikConfig(-1, true, "SALIDA"));
 
   useEffect(() => {
     if (producto) {

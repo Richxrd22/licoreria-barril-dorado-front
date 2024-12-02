@@ -31,10 +31,10 @@ async function listarEmpleado() {
         body: JSON.stringify(empleado),
       });
       if (!response.ok && response.status === 406) {
-        throw new Error("El Producto ingresado ya existe.");
+        throw new Error("El Empleado ingresado ya existe.");
       }
     } catch (error) {
-      if (error.message === "El Producto ingresado ya existe.") {
+      if (error.message === "El Empleado ingresado ya existe.") {
         throw error;
       } else {
         throw new Error("Error al conectar con el servidor");

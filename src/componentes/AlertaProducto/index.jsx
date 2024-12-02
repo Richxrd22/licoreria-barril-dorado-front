@@ -26,7 +26,7 @@ export default function AlertaProducto() {
                     const diffMilliseconds = fechaVencimiento - currentDate;
 
                     const diffDays = Math.floor(diffMilliseconds / (1000 * 3600 * 24));
-                    if (diffDays <= 15 && diffDays > 0) {
+                    if (diffDays <= 15 ) {
                         productosPorVencer += 1;
                     }
 

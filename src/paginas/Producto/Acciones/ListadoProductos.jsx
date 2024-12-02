@@ -162,7 +162,9 @@ export default function ListadoProductos({ productos = [], showFilters = true })
 
   const renderCell = useCallback((product, columnKey) => {
     const cellValue = product[columnKey];
-
+    const fechaVencimiento = new Date(product.fecha_vencimiento);
+    const fechaActual = new Date();
+    const isVencido = fechaVencimiento < fechaActual;
     switch (columnKey) {
       case "nombre":
         return <span>{product.nombre}</span>;
@@ -198,47 +200,38 @@ export default function ListadoProductos({ productos = [], showFilters = true })
             {product.activo === 1 ? "Activo" : "Inactivo"}
           </Chip>
         );
-      case "acciones":
-        return (
-          <div className="relative flex justify-center items-center gap-2">
-            <Dropdown>
-              <DropdownTrigger>
-                <Button isIconOnly size="sm" variant="light">
-                  <VerticalDotsIcon className="text-default-300" />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu>
-                <DropdownItem
-                  onPress={() => openModal(product.id_producto, "view")}
-                >
-                  Ver
-                </DropdownItem>
-                {product.activo !== 0 && (
-                  <DropdownItem
-                    onPress={() => openModal(product.id_producto, "stock")}
-                  >
-                    Gestion Stock
-                  </DropdownItem>
-                )}
-                {rol && (
-                  <DropdownItem
-                    onPress={() => openModal(product.id_producto, "state")}
-                  >
-                    Cambiar Estado
-                  </DropdownItem>
-                )}
-
-                {product.activo !== 0 && (
-                  <DropdownItem
-                    onPress={() => openModal(product.id_producto, "edit")}
-                  >
-                    Editar
-                  </DropdownItem>
-                )}
-              </DropdownMenu>
-            </Dropdown>
-          </div>
-        );
+        case "acciones":
+          return (
+              <div className="relative flex justify-center items-center gap-2">
+                  <Dropdown>
+                      <DropdownTrigger>
+                          <Button isIconOnly size="sm" variant="light">
+                              <VerticalDotsIcon className="text-default-300" />
+                          </Button>
+                      </DropdownTrigger>
+                      <DropdownMenu>
+                          <DropdownItem onPress={() => openModal(product.id_producto, "view")}>
+                              Ver
+                          </DropdownItem>
+                          {product.activo !== 0 && !isVencido && (
+                              <DropdownItem onPress={() => openModal(product.id_producto, "stock")}>
+                                  Gestionar Stock
+                              </DropdownItem>
+                          )}
+                          {rol && (
+                              <DropdownItem onPress={() => openModal(product.id_producto, "state")}>
+                                  Cambiar Estado
+                              </DropdownItem>
+                          )}
+                          {product.activo !== 0 && (
+                              <DropdownItem onPress={() => openModal(product.id_producto, "edit")}>
+                                  Editar
+                              </DropdownItem>
+                          )}
+                      </DropdownMenu>
+                  </Dropdown>
+              </div>
+          );
       default:
         return cellValue;
     }
@@ -304,7 +297,6 @@ export default function ListadoProductos({ productos = [], showFilters = true })
           />
           <div className="flex gap-3">
             {/* Filtro de Vencimiento solo si showFilters es true */}
-            {showFilters && (
               <Dropdown>
                 <DropdownTrigger className="hidden sm:flex">
                   <Button
@@ -334,7 +326,6 @@ export default function ListadoProductos({ productos = [], showFilters = true })
                   ))}
                 </DropdownMenu>
               </Dropdown>
-            )}
   
             {/* Filtro de Estado Cantidad solo si showFilters es true */}
             {showFilters && (

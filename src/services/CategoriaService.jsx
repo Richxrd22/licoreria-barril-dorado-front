@@ -18,6 +18,75 @@ async function listarCategoria() {
   }
 }
 
+async function registrarCategoria(categoria) {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch("http://localhost:7575/categoria/registrar", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(categoria),
+    });
+    if (!response.ok && response.status === 406) {
+      throw new Error("La Categoria ingresado ya existe.");
+    }
+  } catch (error) {
+    if (error.message === "La Categoria ingresado ya existe.") {
+      throw error;
+    } else {
+      throw new Error("Error al conectar con el servidor");
+    }
+  }
+}
+async function obtenerCategoriaId(id) {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(
+      `http://localhost:7575/categoria/buscar/${id}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (response.ok) {
+      const data = response.json();
+      return data;
+    }
+  } catch (error) {
+    throw new Error("Error al conectar al servidor");
+  }
+}
+
+async function editarCategoria(categoria) {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(`http://localhost:7575/categoria/actualizar`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(categoria),
+    });
+    if (!response.ok && response.status === 406) {
+      throw new Error("La Categoria ingresado ya existe.");
+    }
+  } catch (error) {
+    if (error.message === "La Categoria ingresado ya existe.") {
+      throw error;
+    } else {
+      throw new Error("Error al conectar con el servidor");
+    }
+  }
+}
 export const categoriaService = {
-  listarCategoria
+  listarCategoria,
+  registrarCategoria,
+  editarCategoria,
+  obtenerCategoriaId
 };

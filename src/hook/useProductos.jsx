@@ -1,24 +1,31 @@
 import { useState, useEffect } from "react";
 import { productoService } from "../services/ProductoService";
 
-// Función para filtrar productos por vencimiento o bajo stock
 const filtrarProductos = (productos, tipoFiltro) => {
   const currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0); // Aseguramos que sea medianoche
+
   return productos.filter((producto) => {
     if (tipoFiltro === "vencimiento" && producto.fecha_vencimiento) {
       const fechaVencimiento = new Date(producto.fecha_vencimiento);
+      fechaVencimiento.setHours(0, 0, 0, 0);
+
       const diffMilliseconds = fechaVencimiento - currentDate;
       const diffDays = Math.floor(diffMilliseconds / (1000 * 3600 * 24));
-      // Si el producto va a vencer en los próximos 15 días
-      return diffDays <= 15 && diffDays > 0;
+
+      // Incluir productos ya vencidos (diffDays < 0) y próximos a vencer (0 < diffDays <= 15)
+      return diffDays <= 15;
     }
+
     if (tipoFiltro === "bajoStock" && producto.cantidad !== undefined) {
-      // Verifica si el producto tiene 15 unidades o menos en stock
+      // Verificar si el producto tiene 15 unidades o menos en stock
       return producto.cantidad <= 15 && producto.estado_cantidad;
     }
+
     return false;
   });
 };
+
 
 export const useProductos = (productId = null) => {
   const [productos, setProductos] = useState([]);

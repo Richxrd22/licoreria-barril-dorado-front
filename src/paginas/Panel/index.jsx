@@ -25,6 +25,7 @@ import ListadoProductos from "../Producto/Acciones/ListadoProductos";
 import Texto from "../../componentes/Texto";
 import { useProductos } from "../../hook/useProductos";
 import Progress from "../../componentes/Progress";
+import { useMovimientos } from "../../hook/useMovimientos";
 
 // Registrar componentes de Chart.js
 ChartJS.register(
@@ -40,10 +41,50 @@ ChartJS.register(
 );
 
 const Panel = () => {
-  const { productos,productosFiltrados } = useProductos();
+  const { productos, productosFiltrados } = useProductos();
   const [productosNoVencidos, setProductosNoVencidos] = useState([]);
+  const { movimientos,movimientoSumado, loading, error } = useMovimientos(null,2024);
   const [chartData, setChartData] = useState(null);
+  const [chartDataMovimientos, setChartDataMovimientos] = useState(null);
 
+  useEffect(() => {
+    if (movimientoSumado?.length > 0) {
+        // Construir el formato esperado para el gráfico
+        const meses = Array.from({ length: 12 }, (_, index) => ({
+            entrada: 0,
+            salida: 0
+        }));
+
+        movimientoSumado.forEach(({ mes, entrada, salida }) => {
+            // Ajustar índice de mes (0-based en meses)
+            meses[mes - 1] = { entrada, salida };
+        });
+
+        // Actualizar los datos del gráfico
+        setChartDataMovimientos({
+            labels: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
+            datasets: [
+                {
+                    label: "Entradas de Stock",
+                    data: meses.map(m => m.entrada),
+                    backgroundColor: "rgba(0, 220, 195, 0.5)",
+                    borderColor: "rgba(0, 220, 195, 1)",
+                    borderWidth: 1,
+                },
+                {
+                    label: "Salidas de Stock",
+                    data: meses.map(m => m.salida),
+                    backgroundColor: "rgba(255, 99, 132, 0.5)",
+                    borderColor: "rgba(255, 99, 132, 1)",
+                    borderWidth: 1,
+                }
+            ]
+        });
+    }
+}, [movimientoSumado]);
+  
+
+  // Procesar productos y generar gráfico de distribución
   useEffect(() => {
     if (productos?.length > 0) {
       const currentDate = new Date();
@@ -94,7 +135,7 @@ const Panel = () => {
     plugins: {
       title: {
         display: true,
-        text: "Distribución de Productos No Vencidos por Categoría",
+        text: "Distribución de Productos por Categoría",
         font: {
           size: 18,
           weight: "bold",
@@ -114,11 +155,12 @@ const Panel = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: false,
+        display: true,
+        position: "top",
       },
       title: {
         display: true,
-        text: "Movimientos de Stock por Periodo",
+        text: "Entradas y Salidas de Stock por Mes",
         font: {
           size: 18,
           weight: "bold",
@@ -133,39 +175,16 @@ const Panel = () => {
     scales: {
       y: {
         beginAtZero: true,
+        stacked: true,  // Activar el apilamiento
         ticks: {
           stepSize: 10,
         },
       },
       x: {
+        stacked: true,  // Activar el apilamiento
         ticks: { color: "rgba(0, 220, 195)" },
       },
     },
-  };
-
-  // Datos estáticos del gráfico de barras
-  const barChartData = {
-    labels: [
-      "Enero",
-      "Febrero",
-      "Marzo",
-      "Abril",
-      "Mayo",
-      "Junio",
-      "Julio",
-      "Agosto",
-      "Septiembre",
-      "Octubre",
-      "Noviembre",
-      "Diciembre",
-    ],
-    datasets: [
-      {
-        label: "Beneficios",
-        data: [72, 56, 20, 36, 80, 40, 30, 20, 25, 30, 12, 60],
-        backgroundColor: "rgba(0, 220, 195, 0.5)",
-      },
-    ],
   };
 
   return (
@@ -184,7 +203,7 @@ const Panel = () => {
             {chartData ? (
               <Pie data={chartData} options={pieChartOptions} />
             ) : (
-              <Progress/>
+              <Progress />
             )}
           </div>
         </Card>
@@ -194,7 +213,11 @@ const Panel = () => {
           className="border-none w-full lg:w-2/6 lg:flex-1"
         >
           <div className="relative w-full h-64 p-5">
-            <Bar data={barChartData} options={barChartOptions} />
+            {chartDataMovimientos ? (
+              <Bar data={chartDataMovimientos} options={barChartOptions} />
+            ) : (
+              <Progress />
+            )}
           </div>
         </Card>
       </div>

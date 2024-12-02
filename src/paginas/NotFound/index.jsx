@@ -1,7 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useDecodedToken } from "../../hook/useDecodedToken";
 
 export default function NotFound() {
+  const { baseRoute } = useDecodedToken();
   return (
     <main className="flex h-screen items-center w-5/6 m-auto  justify-center  ">
       <div className="text-center">
@@ -14,7 +16,7 @@ export default function NotFound() {
         </p>
         <div className="mt-10 flex items-center justify-center gap-x-6">
           <Link
-            to="/panel"
+            to={`${baseRoute + "/panel"}`}
             className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
             Regresar al Inicio

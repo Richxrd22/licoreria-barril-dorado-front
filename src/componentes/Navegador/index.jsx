@@ -217,13 +217,11 @@ export default function Navegador() {
       >
         <NavbarContent className="sm:hidden pr-3" justify="start">
           <NavbarBrand>
-            <p className="font-bold text-white text-inherit">LOGO</p>
+          
           </NavbarBrand>
         </NavbarContent>
-        <NavbarContent className="hidden sm:flex gap-4" justify="center">
-          <NavbarBrand>
-            <p className="font-bold text-white p-3 text-inherit">LOGO</p>
-          </NavbarBrand>
+        <NavbarContent className="hidden sm:flex gap-4 pl-2" justify="center">
+         
           {rutasNavegacion.map((datos) => (
             <NavbarItem key={datos.id}>
               <NavLink

@@ -23,6 +23,11 @@ export const rutas_navegador_administrador = [
         id: 5,
         ruta: "/proveedor",
         nombre: "Proveedor"
+    },
+    {
+        id: 6,
+        ruta: "/categoria",
+        nombre: "Categoria"
     }
 ]
 

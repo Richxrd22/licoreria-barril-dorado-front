@@ -11,9 +11,9 @@ import Progress from "../../componentes/Progress";
 
 export default function Login() {
   const [isVisible, setIsVisible] = useState(false);
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false); // Indicador de carga
   const navigate = useNavigate();
-
+  const [errorMessage, setErrorMessage] = useState("");
   const toggleVisibility = () => setIsVisible(!isVisible);
 
   const formik = useFormik({
@@ -38,7 +38,7 @@ export default function Login() {
         }
         resetForm();
       } catch (error) {
-        console.log("Error al iniciar sesión. Verifica tus credenciales.");
+        setErrorMessage(error.message);
       } finally {
         setSubmitting(false);
         setLoading(false); 
@@ -54,8 +54,8 @@ export default function Login() {
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <img
           alt="Your Company"
-          src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
-          className="mx-auto h-10 w-auto"
+          src="/public/Icons/logo.png"
+          className="mx-auto  w-auto"
         />
         <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
           Inicia sesión en tu cuenta
@@ -128,9 +128,12 @@ export default function Login() {
             </button>
           </div>
         </form>
+        {errorMessage && (
+          <div className="text-red-500 text-center mt-4">{errorMessage}</div>
+        )}
       </div>
 
-      {loading && <Progress />} 
+      {loading && <Progress />} {/* Mostrar indicador de carga mientras se valida */}
     </div>
   );
 }
