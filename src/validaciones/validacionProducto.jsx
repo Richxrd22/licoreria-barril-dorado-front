@@ -33,6 +33,8 @@ export const validacionProducto = (productos) =>
       .number("Ingrese una cantidad válida")
       .integer("La cantidad debe ser un número entero")
       .positive("La cantidad debe ser mayor a 0")
+      .min(1, "La cantidad debe ser al menos 1")
+      .max(50,"La cantidad no debe ser mayor a 50")
       .required("Campo Obligatorio"),
 
     precio: yup

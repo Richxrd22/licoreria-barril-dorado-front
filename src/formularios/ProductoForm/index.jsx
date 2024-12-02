@@ -208,7 +208,7 @@ export default function ProductoForm({ onClose }) {
                   key={proveedores.id_proveedor}
                   value={proveedores.id_proveedor}
                 >
-                  {proveedores.empresa}
+                  {proveedores.empresa + "  --  " + proveedores.nombre +" "+ proveedores.apellido}
                 </SelectItem>
               );
             })}

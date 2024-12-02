@@ -5,6 +5,7 @@ export const validacionGestionStock = (cantidadTotal, isReducing) =>
     cantidad: Yup.number()
       .required("La cantidad es obligatoria")
       .min(1, "La cantidad debe ser al menos 1")
+     
       .test(
         "is-valid-reduction",
         `La cantidad no puede ser mayor a la disponible (${cantidadTotal})`,

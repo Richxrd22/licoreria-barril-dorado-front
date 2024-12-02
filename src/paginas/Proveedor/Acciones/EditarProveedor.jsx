@@ -29,7 +29,7 @@ export default function EditarProveedor({ onClose, proveedorId }) {
         const data = await proveedorService.listarProveedor();
         setProveedoresExistentes(data);
 
-        const listadoEmpresas = await empresaService.listarEmpresasNoUsadas(proveedorId);
+        const listadoEmpresas = await empresaService.listarEmpresas();
         setEmpresas(listadoEmpresas);
         formik.resetForm({
           values: {

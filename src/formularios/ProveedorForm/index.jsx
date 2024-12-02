@@ -24,12 +24,13 @@ export default function ProveedorForm({ onClose }) {
   };
   const fetchEmpresas = async () => {
     try {
-      const data = await empresaService.listarEmpresasNoUsadas();
+      const data = await empresaService.listarEmpresas();
       setEmpresas(data);
     } catch (error) {
       console.error("Error al obtener Empresas:", error);
     }
   };
+  
   useEffect(() => {
     fetchProveedores();
     fetchEmpresas();
