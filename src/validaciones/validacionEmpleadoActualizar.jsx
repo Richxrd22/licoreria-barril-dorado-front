@@ -6,13 +6,15 @@ const validacionEmpleadoActualizar = (empleadosExistentes, empleadoActual) => {
       .string()
       .required("El nombre es obligatorio")
       .min(2, "El nombre debe tener al menos 2 caracteres")
-      .max(50, "El nombre no puede tener más de 50 caracteres"),
+      .max(50, "El nombre no puede tener más de 50 caracteres")
+      .matches(/^[A-ZÁÉÍÓÚ][a-záéíóú]+$/, "El nombre debe comenzar con mayúscula y no contener números ni caracteres especiales"),
 
     apellido: yup
       .string()
       .required("El apellido es obligatorio")
       .min(2, "El apellido debe tener al menos 2 caracteres")
-      .max(50, "El apellido no puede tener más de 50 caracteres"),
+      .max(50, "El apellido no puede tener más de 50 caracteres")
+      .matches(/^[A-ZÁÉÍÓÚ][a-záéíóú]+$/, "El apellido debe comenzar con mayúscula y no contener números ni caracteres especiales"),
 
     dni: yup
       .string()
@@ -43,7 +45,7 @@ const validacionEmpleadoActualizar = (empleadosExistentes, empleadoActual) => {
     telefono: yup
       .string()
       .required("El celular es obligatorio")
-      .matches(/^\d{9}$/, "El celular debe tener 9 dígitos")
+      .matches(/^9\d{8}$/, "El celular debe comenzar con '9' y tener 9 dígitos")
       .test("telefono-unico", "El celular ya está en uso", (value) => {
         return (
           empleadoActual.telefono === value ||
@@ -55,7 +57,8 @@ const validacionEmpleadoActualizar = (empleadosExistentes, empleadoActual) => {
       .string()
       .required("La dirección es obligatoria")
       .min(5, "La dirección debe tener al menos 5 caracteres")
-      .max(100, "La dirección no puede tener más de 100 caracteres"),
+      .max(100, "La dirección no puede tener más de 100 caracteres")
+      .matches(/^[A-ZÁÉÍÓÚ].*$/, "La dirección debe comenzar con mayúscula y no contener números ni caracteres especiales"),
   });
 };
 

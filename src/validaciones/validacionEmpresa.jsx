@@ -6,6 +6,11 @@ const validacionEmpresa = (empresas) => yup.object({
     .required("El nombre es obligatorio")
     .min(2, "El nombre debe tener al menos 2 caracteres")
     .max(50, "El nombre no puede tener más de 50 caracteres")
+    .test(
+      "primera-letra-mayuscula",
+      "El nombre debe comenzar con una letra mayúscula",
+      (value) => /^[A-Z]/.test(value) // Verifica que la primera letra sea mayúscula
+    )
     .test("nombre-unico", "El nombre ya está en uso", (value) => {
       return !empresas.some((emp) => emp.nombre === value);
     }),

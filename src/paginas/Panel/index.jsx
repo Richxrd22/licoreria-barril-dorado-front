@@ -43,7 +43,8 @@ ChartJS.register(
 const Panel = () => {
   const { productos, productosFiltrados } = useProductos();
   const [productosNoVencidos, setProductosNoVencidos] = useState([]);
-  const { movimientos,movimientoSumado, loading, error } = useMovimientos(null,2024);
+  const currentYear = new Date().getFullYear();  // Obtiene el año actual
+  const { movimientos,movimientoSumado, loading, error } = useMovimientos(null,currentYear);
   const [chartData, setChartData] = useState(null);
   const [chartDataMovimientos, setChartDataMovimientos] = useState(null);
 

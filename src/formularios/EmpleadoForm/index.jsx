@@ -94,6 +94,7 @@ export default function EmpleadoForm({onClose}) {
           placeholder="Introduce el Dni del Empleado"
           id="dni"
           name="dni"
+          maxLength={8}
           value={formik.values.dni}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
@@ -122,6 +123,7 @@ export default function EmpleadoForm({onClose}) {
           placeholder="Introduce el Celular del Empleado"
           id="telefono"
           name="telefono"
+          maxLength={9}
           value={formik.values.telefono}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}

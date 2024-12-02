@@ -1,19 +1,33 @@
 import * as yup from "yup";
 
-// Función que recibe la lista de productos existentes y valida el nombre.
+// Función que recibe la lista de productos existentes y valida los campos.
 export const validacionProducto = (productos) =>
   yup.object({
     nombre: yup
       .string("Ingrese el nombre del producto")
       .required("Campo Obligatorio")
-      .test("nombre-unico", "El nombre del producto ya está en uso", (value) => {
-        // Verifica que el nombre no esté duplicado entre los productos existentes.
-        return !productos.some((prod) => prod.nombre === value);
-      }),
+     
+      .test(
+        "primera-letra-mayuscula",
+        "El nombre debe comenzar con una letra mayúscula",
+        (value) => /^[A-Z]/.test(value) // Verifica que la primera letra sea mayúscula
+      )
+      .test(
+        "nombre-unico",
+        "El nombre del producto ya está en uso",
+        (value) => {
+          return !productos.some((prod) => prod.nombre === value);
+        }
+      ),
 
     descripcion: yup
       .string("Ingrese la descripción del producto")
-      .required("Campo Obligatorio"),
+      .required("Campo Obligatorio")
+      .test(
+        "primera-letra-mayuscula",
+        "La descripción debe comenzar con una letra mayúscula",
+        (value) => /^[A-Z]/.test(value) // Verifica que la primera letra sea mayúscula
+      ),
 
     cantidad: yup
       .number("Ingrese una cantidad válida")
@@ -33,22 +47,29 @@ export const validacionProducto = (productos) =>
 
     fecha_produccion: yup
       .date()
-      .transform((value, originalValue) => (originalValue ? new Date(originalValue) : null))
+      .transform((value, originalValue) =>
+        originalValue ? new Date(originalValue) : null
+      )
       .required("Fecha de producción es obligatoria")
       .typeError("Fecha no válida"),
 
     fecha_vencimiento: yup
       .date()
-      .transform((value, originalValue) => (originalValue ? new Date(originalValue) : null))
+      .transform((value, originalValue) =>
+        originalValue ? new Date(originalValue) : null
+      )
       .required("Fecha de vencimiento es obligatoria")
-      .min(yup.ref('fecha_produccion'), 'La fecha de vencimiento debe ser posterior a la fecha de producción')
+      .min(
+        yup.ref("fecha_produccion"),
+        "La fecha de vencimiento debe ser posterior a la fecha de producción"
+      )
       .typeError("Fecha no válida"),
 
     id_categoria: yup
-      .number("Seleccione una categoría")  // Añadido tipo número
+      .number("Seleccione una categoría")
       .required("Seleccione una categoría"),
 
     id_proveedor: yup
-      .number("Seleccione un proveedor")  // Añadido tipo número
-      .required("Seleccione un proveedor")
+      .number("Seleccione un proveedor")
+      .required("Seleccione un proveedor"),
   });

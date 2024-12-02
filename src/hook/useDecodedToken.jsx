@@ -16,7 +16,7 @@ export const useDecodedToken = () => {
         const miToken = localStorage.getItem("token");
         if (miToken) {
             try {
-                return jwtDecode(miToken); // Decodificamos el token
+                return jwtDecode(miToken); 
             } catch (error) {
                 console.error("Error al decodificar el token:", error);
                 return null;
@@ -40,5 +40,5 @@ export const useDecodedToken = () => {
             ? "/admin"
             : "/empleado";
 
-    return { baseRoute, rol ,correo};
+    return { baseRoute, rol ,correo,decodedToken};
 };

@@ -5,6 +5,11 @@ export const validacionEmpresaActualizar = (empresas, empresaActualizar) =>
     nombre: yup
       .string("Ingrese el nombre de la empresa")
       .required("El nombre es obligatorio")
+      .test(
+        "primera-letra-mayuscula",
+        "El nombre debe comenzar con una letra mayúscula",
+        (value) => /^[A-Z]/.test(value) // Verifica que la primera letra sea mayúscula
+      )
       .test("nombre-unico", "El nombre ya está en uso", (value) => {
         const valorNormalizado = value?.toLowerCase();
         return !empresas.some(

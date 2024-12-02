@@ -104,6 +104,7 @@ export default function ProveedorForm({ onClose }) {
           placeholder="Introduce el Dni del Proveedor"
           id="dni"
           name="dni"
+          maxLength={8}
           value={formik.values.dni}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
@@ -132,6 +133,7 @@ export default function ProveedorForm({ onClose }) {
           placeholder="Introduce el Celular del Proveedor"
           id="telefono"
           name="telefono"
+          maxLength={9}
           value={formik.values.telefono}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}

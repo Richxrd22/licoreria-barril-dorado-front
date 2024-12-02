@@ -6,13 +6,15 @@ export const validacionProveedorActualizar = (proveedores, proveedorActual) =>
       .string("Ingrese el nombre del proveedor")
       .required("El nombre es obligatorio")
       .min(2, "El nombre debe tener al menos 2 caracteres")
+      .matches(/^[A-ZÁÉÍÓÚ][a-záéíóú]+$/, "El nombre debe comenzar con mayúscula y no contener números ni caracteres especiales")
       .max(50, "El nombre no puede tener más de 50 caracteres"),
 
     apellido: yup
       .string("Ingrese el apellido del proveedor")
       .required("El apellido es obligatorio")
       .min(2, "El apellido debe tener al menos 2 caracteres")
-      .max(50, "El apellido no puede tener más de 50 caracteres"),
+      .max(50, "El apellido no puede tener más de 50 caracteres")
+      .matches(/^[A-ZÁÉÍÓÚ][a-záéíóú]+$/, "El apellido debe comenzar con mayúscula y no contener números ni caracteres especiales"),
 
     correo: yup
       .string("Ingrese un correo válido")

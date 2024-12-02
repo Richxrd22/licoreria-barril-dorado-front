@@ -6,6 +6,7 @@ const validacionCategoria = (categorias) => yup.object({
     .required("El nombre es obligatorio")
     .min(2, "El nombre debe tener al menos 2 caracteres")
     .max(50, "El nombre no puede tener más de 50 caracteres")
+    .matches(/^[A-ZÁÉÍÓÚ][a-záéíóú]+$/, "El nombre debe comenzar con mayúscula y no contener números ni caracteres especiales")
     .test("nombre-unico", "El nombre ya está en uso", (value) => {
       if (!value) return true; // Si no hay valor, no se ejecuta la validación.
       

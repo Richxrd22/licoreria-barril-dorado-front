@@ -7,6 +7,7 @@ export const validacionCategoriaActualizar = (categorias, categoriaActualizar) =
       .required("El nombre es obligatorio")
       .min(2, "El nombre debe tener al menos 2 caracteres")
       .max(50, "El nombre no puede tener más de 50 caracteres")
+      .matches(/^[A-ZÁÉÍÓÚ][a-záéíóú]+$/, "El nombre debe comenzar con mayúscula y no contener números ni caracteres especiales")
       .test("nombre-categoria-unico", "El nombre de la categoría ya está en uso", (value) => {
         const valorNormalizado = value?.toLowerCase();
         return !categorias.some(

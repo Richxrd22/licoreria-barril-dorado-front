@@ -84,5 +84,6 @@ export const useProductos = (productId = null) => {
     error,
     fetchProductos,
     fetchProductoPorId,
+    setProductos
   };
 };

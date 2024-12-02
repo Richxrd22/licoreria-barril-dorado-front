@@ -6,6 +6,11 @@ export const validacionProductoActualizar = (productos, productoActualizar) =>
     nombre: yup
       .string("Ingrese el nombre del producto")
       .required("Campo Obligatorio")
+      .test(
+        "primera-letra-mayuscula",
+        "El nombre debe comenzar con una letra mayúscula",
+        (value) => /^[A-Z]/.test(value) // Verifica que la primera letra sea mayúscula
+      )
       .test("nombre-unico", "El nombre del producto ya está en uso", (value) => {
         // Normaliza el nombre a minúsculas para comparación insensible a mayúsculas
         const nombreNormalizado = value?.toLowerCase();
@@ -21,7 +26,12 @@ export const validacionProductoActualizar = (productos, productoActualizar) =>
 
     descripcion: yup
       .string("Ingrese la descripción del producto")
-      .required("Campo Obligatorio"),
+      .required("Campo Obligatorio")
+      .test(
+        "primera-letra-mayuscula",
+        "El nombre debe comenzar con una letra mayúscula",
+        (value) => /^[A-Z]/.test(value) // Verifica que la primera letra sea mayúscula
+      ),
 
     precio: yup
       .number("Ingrese un precio válido")

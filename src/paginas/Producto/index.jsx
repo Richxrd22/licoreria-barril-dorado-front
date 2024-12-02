@@ -23,11 +23,12 @@ import ProductoForm from "../../formularios/ProductoForm";
 import ListadoProductos from "./Acciones/ListadoProductos";
 import { useProductos } from "../../hook/useProductos";
 import Texto from "../../componentes/Texto";
+import { useProductosManager } from "../../hook/useProductosManager";
 
 export default function Producto() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const { productos } =
-    useProductos();
+  const { productos, setProductos, actualizarTabla } = useProductosManager();
+  
   return (
     <div className="flex flex-col py-5 lg:py-10  w-11/12 m-auto gap-4">
       <div>
@@ -40,7 +41,10 @@ export default function Producto() {
         </Button>
       </div>
       <Texto titulo texto={"Listado de Productos"} />
-      <ListadoProductos productos={productos} />
+      <ListadoProductos productos={productos} 
+        setProductos={setProductos}
+        actualizarTabla={actualizarTabla}
+        showFilters={true} />
       <Modal size="2xl" isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (
@@ -49,7 +53,7 @@ export default function Producto() {
                 Registrar Producto
               </ModalHeader>
               <ModalBody>
-                <ProductoForm  onClose={onClose} />
+                <ProductoForm onClose={onClose} />
               </ModalBody>
             </>
           )}
